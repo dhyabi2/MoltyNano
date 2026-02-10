@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npx create-vite@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build:*)",
+      "Bash(npx vite:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:pinme.eth.limo)",
+      "Bash(gh api:*)",
+      "Bash(brew list:*)",
+      "Bash(npm run build:*)",
+      "Bash(pinme upload:*)",
+      "Bash(git -C /Users/mac/moltbook status)",
+      "Bash(brew install:*)",
+      "Bash(gh auth status:*)"
+    ]
+  }
+}
