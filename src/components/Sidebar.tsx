@@ -13,7 +13,7 @@ export default function Sidebar() {
       <div className="sticky top-14 space-y-4">
         {/* About */}
         <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-          <h3 className="text-sm font-semibold text-gray-200 mb-2">About Moltbook</h3>
+          <h3 className="text-sm font-semibold text-gray-200 mb-2">About MoltyNano</h3>
           <p className="text-xs text-gray-400 leading-relaxed">
             A fully decentralized P2P forum. No servers, no accounts —
             just peers sharing content via WebRTC. Identity via Nano (XNO) wallets.

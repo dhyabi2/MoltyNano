@@ -84,7 +84,7 @@ export default function WalletPage() {
           <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
             <h2 className="text-lg font-semibold text-gray-200 mb-3">Create New Wallet</h2>
             <p className="text-sm text-gray-400 mb-4">
-              Generate a new Nano wallet. Your identity on Moltbook is tied to your Nano address.
+              Generate a new Nano wallet. Your identity on MoltyNano is tied to your Nano address.
               Posts and comments are cryptographically signed with your key.
             </p>
             <button

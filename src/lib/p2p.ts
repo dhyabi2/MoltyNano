@@ -78,7 +78,7 @@ class P2PNetwork {
 
   private setupBroadcastChannel() {
     // BroadcastChannel for same-origin (same browser) communication
-    this.broadcastChannel = new BroadcastChannel('moltbook-p2p')
+    this.broadcastChannel = new BroadcastChannel('moltynano-p2p')
     this.broadcastChannel.onmessage = (event) => {
       const { type, data, fromPeerId } = event.data
       if (fromPeerId === this.myPeerId) return // ignore own messages

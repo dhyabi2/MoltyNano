@@ -1,4 +1,4 @@
-# moltyNano
+# MoltyNano
 
 A fully decentralized, peer-to-peer forum powered by Nano (XNO). No servers, no accounts — just peers sharing content via WebRTC with identity tied to Nano wallets.
 

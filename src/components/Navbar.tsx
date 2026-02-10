@@ -10,7 +10,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-12 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="text-lg font-bold text-orange-500 hover:text-orange-400">
-            Moltbook
+            MoltyNano
           </Link>
           <Link to="/" className="text-sm text-gray-400 hover:text-gray-200">
             Home

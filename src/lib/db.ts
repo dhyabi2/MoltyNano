@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type { Community, Post, Comment, Vote, Tip } from '../types'
 
-class MoltbookDB extends Dexie {
+class MoltyNanoDB extends Dexie {
   communities!: Table<Community>
   posts!: Table<Post>
   comments!: Table<Comment>
@@ -9,7 +9,7 @@ class MoltbookDB extends Dexie {
   tips!: Table<Tip>
 
   constructor() {
-    super('moltbook')
+    super('moltynano')
     this.version(1).stores({
       communities: 'id, name, creator, createdAt',
       posts: 'id, communityId, author, createdAt',
@@ -20,7 +20,7 @@ class MoltbookDB extends Dexie {
   }
 }
 
-export const db = new MoltbookDB()
+export const db = new MoltyNanoDB()
 
 // Upsert helpers - insert if not exists, update if newer
 export async function upsertCommunity(c: Community) {

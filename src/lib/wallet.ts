@@ -2,7 +2,7 @@ import { wallet as nanoWallet, tools as nanoTools, block as nanoBlock } from 'na
 import { getAccountInfo, generateWork, processBlock, getPendingBlocks } from './nano-rpc'
 import type { WalletState } from '../types'
 
-const STORAGE_KEY = 'moltbook_wallet'
+const STORAGE_KEY = 'moltynano_wallet'
 const DEFAULT_REP = 'nano_3t6k35gi95xu6tergt6p69ck76ogmitber8735se2jguj7esgdkc5dgg8xa6' // nano foundation
 
 export function createWallet(): { seed: string; address: string; publicKey: string; privateKey: string } {

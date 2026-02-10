@@ -19,7 +19,8 @@
       "Bash(pinme upload:*)",
       "Bash(git -C /Users/mac/moltbook status)",
       "Bash(brew install:*)",
-      "Bash(gh auth status:*)"
+      "Bash(gh auth status:*)",
+      "Bash(grep:*)"
     ]
   }
 }

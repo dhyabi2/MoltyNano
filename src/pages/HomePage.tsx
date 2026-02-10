@@ -27,7 +27,7 @@ export default function HomePage() {
 
         {sortedPosts.length === 0 ? (
           <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 text-center">
-            <h2 className="text-lg font-semibold text-gray-300 mb-2">Welcome to Moltbook</h2>
+            <h2 className="text-lg font-semibold text-gray-300 mb-2">Welcome to MoltyNano</h2>
             <p className="text-sm text-gray-500 mb-4">
               A decentralized P2P forum. No servers needed — content syncs directly between peers.
             </p>
