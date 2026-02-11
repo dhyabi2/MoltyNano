@@ -98,23 +98,23 @@ export default function WalletPage() {
           <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
             <h2 className="text-lg font-semibold text-gray-200 mb-3">Import Existing Wallet</h2>
             <p className="text-sm text-gray-400 mb-3">
-              Enter your 64-character hex seed to import an existing wallet.
+              Enter your 128-character hex seed to import an existing wallet.
             </p>
             <input
               type="password"
               value={importSeed}
               onChange={(e) => setImportSeed(e.target.value)}
-              placeholder="Enter your 64-character hex seed"
+              placeholder="Enter your 128-character hex seed"
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 mb-3 font-mono"
             />
             <button
               onClick={() => {
-                if (importSeed.trim().length === 64) {
+                if (importSeed.trim().length === 128) {
                   initWallet(importSeed.trim())
                   setImportSeed('')
                 }
               }}
-              disabled={importSeed.trim().length !== 64}
+              disabled={importSeed.trim().length !== 128}
               className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded font-medium"
             >
               Import

@@ -3,7 +3,7 @@ import { getAccountInfo, generateWork, processBlock, getPendingBlocks } from './
 import type { WalletState } from '../types'
 
 const STORAGE_KEY = 'moltynano_wallet'
-const DEFAULT_REP = 'nano_3t6k35gi95xu6tergt6p69ck76ogmitber8735se2jguj7esgdkc5dgg8xa6' // nano foundation
+const DEFAULT_REP = 'nano_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4' // nano foundation
 
 export function createWallet(): { seed: string; address: string; publicKey: string; privateKey: string } {
   const w = nanoWallet.generate()
@@ -44,6 +44,33 @@ export function verifySignature(publicKey: string, message: string, signature: s
   }
 }
 
+// Derive public key from nano address for verification
+export function publicKeyFromAddress(address: string): string | null {
+  try {
+    return nanoTools.addressToPublicKey(address)
+  } catch {
+    return null
+  }
+}
+
+// Verify a post's signature using the author's nano address
+export function verifyPostSignature(post: { id: string; title: string; body: string; communityId: string; createdAt: number; author: string; signature: string }): boolean {
+  if (!post.signature || post.author === 'anonymous') return true // unsigned content is allowed but marked
+  const pubKey = publicKeyFromAddress(post.author)
+  if (!pubKey) return false
+  const postData = { id: post.id, title: post.title, body: post.body, communityId: post.communityId, createdAt: post.createdAt }
+  return verifySignature(pubKey, JSON.stringify(postData), post.signature)
+}
+
+// Verify a comment's signature using the author's nano address
+export function verifyCommentSignature(comment: { id: string; body: string; postId: string; parentId: string | null; createdAt: number; author: string; signature: string }): boolean {
+  if (!comment.signature || comment.author === 'anonymous') return true
+  const pubKey = publicKeyFromAddress(comment.author)
+  if (!pubKey) return false
+  const commentData = { id: comment.id, body: comment.body, postId: comment.postId, parentId: comment.parentId, createdAt: comment.createdAt }
+  return verifySignature(pubKey, JSON.stringify(commentData), comment.signature)
+}
+
 export function saveWallet(state: WalletState): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }
@@ -81,8 +108,8 @@ export async function sendNano(
     throw new Error('Insufficient balance')
   }
 
-  // Generate work
-  const work = await generateWork(info.frontier)
+  // Generate work (send difficulty threshold)
+  const work = await generateWork(info.frontier, 'send')
   if (!work) {
     throw new Error('Failed to generate work. Try again later.')
   }
@@ -118,7 +145,10 @@ export async function receiveNano(
 
   for (const [blockHash, blockInfo] of Object.entries(pending)) {
     try {
-      const work = await generateWork(info ? info.frontier : address.replace('nano_', '').replace('xrb_', ''))
+      // For open blocks (new account): work is computed against the public key (hex)
+      // For existing accounts: work is computed against the frontier (previous block hash)
+      const workHash = info ? info.frontier : nanoTools.addressToPublicKey(address)
+      const work = await generateWork(workHash, 'receive')
       if (!work) continue
 
       if (!info) {

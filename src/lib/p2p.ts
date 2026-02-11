@@ -1,6 +1,6 @@
 import Peer, { type DataConnection } from 'peerjs'
 import type { P2PMessage, SyncData } from '../types'
-import { getAllData, mergeData } from './db'
+import { getAllData, getDataSince, mergeData } from './db'
 
 type MessageHandler = (msg: P2PMessage, peerId: string) => void
 
@@ -14,6 +14,13 @@ class P2PNetwork {
   private knownPeers: Set<string> = new Set()
   private reconnectTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
   private _isReady = false
+  // Message deduplication: track seen message hashes with TTL
+  private seenMessages: Map<string, number> = new Map()
+  private readonly SEEN_MSG_TTL = 30_000 // 30 seconds
+  // Offline message queue
+  private offlineQueue: P2PMessage[] = []
+  // Track last sync time per peer for delta sync
+  private lastSyncTime: Map<string, number> = new Map()
 
   get peerId(): string {
     return this.myPeerId
@@ -25,6 +32,34 @@ class P2PNetwork {
 
   get isReady(): boolean {
     return this._isReady
+  }
+
+  // Generate a hash key for message deduplication
+  private getMessageKey(msg: P2PMessage): string | null {
+    switch (msg.type) {
+      case 'NEW_COMMUNITY': return `community:${msg.data.id}`
+      case 'NEW_POST': return `post:${msg.data.id}`
+      case 'NEW_COMMENT': return `comment:${msg.data.id}`
+      case 'VOTE': return `vote:${msg.data.id}`
+      case 'TIP': return `tip:${msg.data.id}`
+      default: return null // SYNC_REQUEST, SYNC_RESPONSE, PEER_LIST are not deduplicated
+    }
+  }
+
+  // Check if message was already processed; if not, mark it as seen
+  private isMessageSeen(msg: P2PMessage): boolean {
+    const key = this.getMessageKey(msg)
+    if (!key) return false // non-dedup messages always pass through
+    const now = Date.now()
+    // Clean expired entries periodically
+    if (this.seenMessages.size > 500) {
+      for (const [k, ts] of this.seenMessages) {
+        if (now - ts > this.SEEN_MSG_TTL) this.seenMessages.delete(k)
+      }
+    }
+    if (this.seenMessages.has(key)) return true
+    this.seenMessages.set(key, now)
+    return false
   }
 
   async init(): Promise<string> {
@@ -89,8 +124,10 @@ class P2PNetwork {
           this.connectToPeer(fromPeerId)
         }
       } else if (type === 'MESSAGE') {
+        const msg = data as P2PMessage
+        if (this.isMessageSeen(msg)) return // skip duplicate
         // Relay message from BroadcastChannel
-        this.notifyMessageHandlers(data as P2PMessage, fromPeerId)
+        this.notifyMessageHandlers(msg, fromPeerId)
       }
     }
 
@@ -137,8 +174,17 @@ class P2PNetwork {
       this.knownPeers.add(remotePeerId)
       this.notifyConnectionHandlers()
 
-      // Request sync from new peer
-      this.sendToPeer(remotePeerId, { type: 'SYNC_REQUEST' })
+      // Flush offline queue to new peer
+      if (this.offlineQueue.length > 0) {
+        for (const queuedMsg of this.offlineQueue) {
+          this.sendToPeer(remotePeerId, queuedMsg)
+        }
+        this.offlineQueue = []
+      }
+
+      // Request sync from new peer (delta if we've synced before)
+      const since = this.lastSyncTime.get(remotePeerId)
+      this.sendToPeer(remotePeerId, { type: 'SYNC_REQUEST', since })
 
       // Share our known peers
       const peerList = Array.from(this.knownPeers).filter(
@@ -152,6 +198,7 @@ class P2PNetwork {
     conn.on('data', (rawData) => {
       try {
         const msg = rawData as P2PMessage
+        if (this.isMessageSeen(msg)) return // skip duplicate
         this.handleMessage(msg, remotePeerId)
       } catch (err) {
         console.error('[P2P] Error handling message:', err)
@@ -184,19 +231,22 @@ class P2PNetwork {
       this.connections.set(remotePeerId, conn)
       this.knownPeers.add(remotePeerId)
       this.notifyConnectionHandlers()
-      this.sendToPeer(remotePeerId, { type: 'SYNC_REQUEST' })
+      const since = this.lastSyncTime.get(remotePeerId)
+      this.sendToPeer(remotePeerId, { type: 'SYNC_REQUEST', since })
     }
   }
 
   private async handleMessage(msg: P2PMessage, fromPeerId: string) {
     switch (msg.type) {
       case 'SYNC_REQUEST': {
-        const data = await getAllData()
+        // Support delta sync: if 'since' timestamp provided, only send newer records
+        const data = msg.since ? await getDataSince(msg.since) : await getAllData()
         this.sendToPeer(fromPeerId, { type: 'SYNC_RESPONSE', data })
         break
       }
       case 'SYNC_RESPONSE': {
         await mergeData(msg.data)
+        this.lastSyncTime.set(fromPeerId, Date.now())
         this.notifyMessageHandlers(msg, fromPeerId)
         break
       }
@@ -226,10 +276,13 @@ class P2PNetwork {
   }
 
   broadcast(msg: P2PMessage) {
+    let sentToAnyPeer = false
+
     // Send to all connected PeerJS peers
     for (const [, conn] of this.connections) {
       if (conn.open) {
         conn.send(msg)
+        sentToAnyPeer = true
       }
     }
 
@@ -240,6 +293,15 @@ class P2PNetwork {
         data: msg,
         fromPeerId: this.myPeerId,
       })
+    }
+
+    // If no peers connected, queue for later delivery
+    if (!sentToAnyPeer && msg.type !== 'SYNC_REQUEST' && msg.type !== 'SYNC_RESPONSE') {
+      this.offlineQueue.push(msg)
+      // Cap queue size to prevent memory bloat
+      if (this.offlineQueue.length > 1000) {
+        this.offlineQueue = this.offlineQueue.slice(-500)
+      }
     }
   }
 

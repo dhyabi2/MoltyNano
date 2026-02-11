@@ -40,3 +40,10 @@ export function importFromIPFS(json: string) {
     throw new Error('Invalid IPFS data format')
   }
 }
+
+// Verify a CID matches the content hash
+export async function verifyCID(data: unknown, claimedCid: string): Promise<boolean> {
+  if (!claimedCid) return true // no CID to verify
+  const computedCid = await hashContent(data)
+  return computedCid === claimedCid
+}

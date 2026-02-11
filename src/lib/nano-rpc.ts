@@ -2,8 +2,8 @@
 // Uses public RPC nodes
 
 const RPC_URLS = [
-  'https://proxy.nanos.cc/proxy',
   'https://rpc.nano.to',
+  'https://mynano.ninja/api/node',
 ]
 
 let currentRpcIndex = 0
@@ -90,17 +90,42 @@ export async function getAccountBalance(account: string): Promise<{
   }
 }
 
-export async function generateWork(hash: string): Promise<string> {
+// Client-side work generation fallback using nano-pow (WebGPU/WebGL/WASM)
+async function generateWorkLocal(hash: string, difficulty: string): Promise<string> {
+  try {
+    const { NanoPow } = await import('nano-pow')
+    console.log('[Nano] Generating work client-side via nano-pow...')
+    const result = await NanoPow.work_generate(hash, { difficulty })
+    if ('error' in result) {
+      console.warn('[Nano] Client-side work generation error:', result.error)
+      return ''
+    }
+    console.log('[Nano] Client-side work generated successfully')
+    return result.work
+  } catch (err) {
+    console.warn('[Nano] Client-side work generation failed:', err)
+    return ''
+  }
+}
+
+export async function generateWork(hash: string, subtype: 'send' | 'receive' = 'send'): Promise<string> {
+  // Send/Change blocks: fffffff800000000 (higher difficulty)
+  // Receive/Open blocks: fffffe0000000000 (lower difficulty)
+  const difficulty = subtype === 'send' ? 'fffffff800000000' : 'fffffe0000000000'
+
+  // Try remote RPC first (faster when available)
   try {
     const result = await rpcCall('work_generate', {
       hash,
-      difficulty: 'fffffff800000000', // receive threshold (lower)
+      difficulty,
     }) as Record<string, string>
-    return result.work || ''
+    if (result.work) return result.work
   } catch {
-    console.warn('[Nano] Work generation failed on remote, returning empty')
-    return ''
+    console.warn('[Nano] Remote work generation failed, falling back to client-side')
   }
+
+  // Fallback: generate work client-side using nano-pow (WebGPU/WebGL/WASM)
+  return generateWorkLocal(hash, difficulty)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,7 +145,7 @@ export async function processBlock(block: any, subtype: string): Promise<string>
 
 export async function getPendingBlocks(account: string): Promise<Record<string, { amount: string; source: string }>> {
   try {
-    const result = await rpcCall('pending', {
+    const result = await rpcCall('receivable', {
       account,
       count: '20',
       source: true,

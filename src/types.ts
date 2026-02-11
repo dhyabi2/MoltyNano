@@ -68,7 +68,7 @@ export interface WalletState {
 }
 
 export type P2PMessage =
-  | { type: 'SYNC_REQUEST' }
+  | { type: 'SYNC_REQUEST'; since?: number }
   | { type: 'SYNC_RESPONSE'; data: SyncData }
   | { type: 'NEW_COMMUNITY'; data: Community }
   | { type: 'NEW_POST'; data: Post }

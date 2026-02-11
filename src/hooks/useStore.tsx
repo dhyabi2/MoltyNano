@@ -16,10 +16,10 @@ import type {
   P2PMessage,
   WalletState,
 } from '../types'
-import { db, upsertCommunity, upsertPost, upsertComment, upsertVote, upsertTip, getAllData, mergeData } from '../lib/db'
+import { db, upsertCommunity, upsertPost, upsertComment, upsertVote, upsertTip, getAllData, mergeData, validateSyncData, onDBChange, checkDataIntegrity } from '../lib/db'
 import { p2pNetwork } from '../lib/p2p'
 import { hashContent, generateId } from '../lib/ipfs'
-import { signMessage, loadWallet, saveWallet, createWallet, walletFromSeed } from '../lib/wallet'
+import { signMessage, loadWallet, saveWallet, createWallet, walletFromSeed, verifyPostSignature, verifyCommentSignature } from '../lib/wallet'
 
 type Action =
   | { type: 'SET_WALLET'; wallet: WalletState }
@@ -186,6 +186,47 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Periodic data integrity check (every 5 minutes)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const result = await checkDataIntegrity()
+      if (!result.ok) {
+        console.error('[Store] Data integrity issues:', result.errors)
+      }
+    }, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Cross-tab IndexedDB change notification - reload data when another tab writes
+  useEffect(() => {
+    const unsubDB = onDBChange(async () => {
+      const data = await getAllData()
+      dispatch({ type: 'LOAD_ALL', data })
+    })
+    return unsubDB
+  }, [])
+
+  // Cross-tab wallet sync via storage events
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'moltynano_wallet') {
+        if (e.newValue) {
+          try {
+            const wallet = JSON.parse(e.newValue) as WalletState
+            dispatch({ type: 'SET_WALLET', wallet })
+          } catch {
+            // Invalid wallet data, ignore
+          }
+        } else {
+          // Wallet was cleared in another tab
+          dispatch({ type: 'SET_WALLET', wallet: initialState.wallet })
+        }
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
   // Initialize P2P network
   useEffect(() => {
     async function initP2P() {
@@ -208,22 +249,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubMsg = p2pNetwork.onMessage((msg: P2PMessage) => {
       switch (msg.type) {
-        case 'SYNC_RESPONSE':
-          mergeData(msg.data).then(() => {
-            dispatch({ type: 'MERGE_SYNC', data: msg.data })
+        case 'SYNC_RESPONSE': {
+          const validatedData = validateSyncData(msg.data)
+          mergeData(validatedData).then(() => {
+            dispatch({ type: 'MERGE_SYNC', data: validatedData })
           })
           break
+        }
         case 'NEW_COMMUNITY':
           upsertCommunity(msg.data).then(() => {
             dispatch({ type: 'ADD_COMMUNITY', community: msg.data })
           })
           break
         case 'NEW_POST':
+          if (!verifyPostSignature(msg.data)) {
+            console.warn('[Store] Rejected post with invalid signature:', msg.data.id)
+            break
+          }
           upsertPost(msg.data).then(() => {
             dispatch({ type: 'ADD_POST', post: msg.data })
           })
           break
         case 'NEW_COMMENT':
+          if (!verifyCommentSignature(msg.data)) {
+            console.warn('[Store] Rejected comment with invalid signature:', msg.data.id)
+            break
+          }
           upsertComment(msg.data).then(() => {
             dispatch({ type: 'ADD_COMMENT', comment: msg.data })
           })
@@ -399,7 +450,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const importDataAction = useCallback(async (json: string) => {
-    const data = JSON.parse(json)
+    const raw = JSON.parse(json)
+    const data = validateSyncData(raw)
     await mergeData(data)
     const allData = await getAllData()
     dispatch({ type: 'LOAD_ALL', data: allData })
