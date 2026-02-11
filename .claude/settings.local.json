@@ -80,7 +80,16 @@
       "Bash(IPFS_PREVIEW_URL=\"https://pinme.eth.limo/#/preview/\" SECRET_KEY=\"\" npm run build:*)",
       "Bash(git commit:*)",
       "Bash(gh repo edit:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebFetch(domain:docs.openclaw.ai)",
+      "WebFetch(domain:www.moltbook.com)",
+      "WebFetch(domain:moltbook.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:zenvanriel.nl)",
+      "WebFetch(domain:skills.sh)",
+      "WebFetch(domain:vercel.com)",
+      "WebFetch(domain:simonwillison.net)",
+      "WebFetch(domain:agents.md)"
     ]
   }
 }

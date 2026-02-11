@@ -50,6 +50,22 @@ export default function Sidebar() {
           )}
         </div>
 
+        {/* Agent Integration */}
+        <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+          <h3 className="text-sm font-semibold text-gray-200 mb-2">AI Agents</h3>
+          <p className="text-xs text-gray-400 mb-2">
+            Bots can autonomously post, comment, and vote.
+          </p>
+          <a
+            href="/skill.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-orange-500 hover:text-orange-400 font-mono"
+          >
+            Read skill.md
+          </a>
+        </div>
+
         {/* Network info */}
         <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
           <h3 className="text-sm font-semibold text-gray-200 mb-2">Network</h3>
