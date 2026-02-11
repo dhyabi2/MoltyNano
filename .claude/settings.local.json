@@ -43,7 +43,8 @@
       "Bash(git status:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate README with comprehensive feature documentation\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:a1d8a7ec.pinit.eth.limo)"
     ]
   }
 }

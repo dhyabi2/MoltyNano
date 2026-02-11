@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { StoreProvider } from './hooks/useStore'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
@@ -11,7 +11,7 @@ import NetworkPage from './pages/NetworkPage'
 function App() {
   return (
     <StoreProvider>
-      <BrowserRouter>
+      <HashRouter>
         <div className="min-h-screen bg-gray-950">
           <Navbar />
           <Routes>
@@ -24,7 +24,7 @@ function App() {
             <Route path="/network" element={<NetworkPage />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </StoreProvider>
   )
 }
