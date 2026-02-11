@@ -5,7 +5,7 @@ const BASE_URL = 'http://localhost:4173'
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
 async function createWallet(page: Page) {
-  await page.goto(`${BASE_URL}/wallet`)
+  await page.goto(`${BASE_URL}/#/wallet`)
   await page.waitForTimeout(500)
   const btn = page.locator('button:has-text("Generate Wallet")')
   if (await btn.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -19,7 +19,7 @@ async function waitForNetwork(page: Page) {
 }
 
 async function createCommunity(page: Page, name: string, description: string) {
-  await page.goto(`${BASE_URL}/communities`)
+  await page.goto(`${BASE_URL}/#/communities`)
   await page.waitForTimeout(1000)
   await page.locator('text=Create a new community').click()
   await page.waitForTimeout(500)
@@ -30,7 +30,7 @@ async function createCommunity(page: Page, name: string, description: string) {
 }
 
 async function createPostOnCommunity(page: Page, communityName: string, title: string, body: string) {
-  await page.goto(`${BASE_URL}/c/${communityName}`)
+  await page.goto(`${BASE_URL}/#/c/${communityName}`)
   await page.waitForTimeout(1000)
   await page.locator('text=Create a post...').click()
   await page.waitForTimeout(500)
@@ -421,7 +421,7 @@ test.describe('Wallet Management', () => {
     await createWallet(page)
 
     // Go to wallet page and update display name
-    await page.goto(`${BASE_URL}/wallet`)
+    await page.goto(`${BASE_URL}/#/wallet`)
     await page.waitForTimeout(1000)
 
     const nameInput = page.locator('input').filter({ has: page.locator('..', { hasText: 'Display Name' }) }).last()
@@ -468,7 +468,7 @@ test.describe('Wallet Management', () => {
     expect(before).toBeTruthy()
 
     // Go to wallet page and disconnect
-    await page.goto(`${BASE_URL}/wallet`)
+    await page.goto(`${BASE_URL}/#/wallet`)
     await page.waitForTimeout(1000)
 
     // Handle confirm dialog
@@ -495,7 +495,7 @@ test.describe('Data Validation & Import/Export', () => {
     await createWallet(page)
     await createCommunity(page, 'exporttest', 'Export test')
 
-    await page.goto(`${BASE_URL}/network`)
+    await page.goto(`${BASE_URL}/#/network`)
     await page.waitForTimeout(1000)
     await page.locator('button:has-text("Export Data")').click()
     await page.waitForTimeout(1500)
@@ -520,7 +520,7 @@ test.describe('Data Validation & Import/Export', () => {
     await createCommunity(page, 'roundtrip', 'Roundtrip test')
 
     // Export
-    await page.goto(`${BASE_URL}/network`)
+    await page.goto(`${BASE_URL}/#/network`)
     await page.waitForTimeout(1000)
     await page.locator('button:has-text("Export Data")').click()
     await page.waitForTimeout(1500)
@@ -532,7 +532,7 @@ test.describe('Data Validation & Import/Export', () => {
     await waitForNetwork(page)
 
     // Import
-    await page.goto(`${BASE_URL}/network`)
+    await page.goto(`${BASE_URL}/#/network`)
     await page.waitForTimeout(1000)
     await page.locator('textarea[placeholder*="Paste"]').fill(exportedJson)
     await page.locator('button:has-text("Import")').last().click()
@@ -548,7 +548,7 @@ test.describe('Data Validation & Import/Export', () => {
     await page.reload()
     await waitForNetwork(page)
 
-    await page.goto(`${BASE_URL}/network`)
+    await page.goto(`${BASE_URL}/#/network`)
     await page.waitForTimeout(1000)
     await page.locator('textarea[placeholder*="Paste"]').fill('this is not valid json {{{')
     await page.locator('button:has-text("Import")').last().click()
@@ -743,7 +743,7 @@ test.describe('Post Page', () => {
     await page.reload()
     await waitForNetwork(page)
 
-    await page.goto(`${BASE_URL}/c/fake/post/nonexistent123`)
+    await page.goto(`${BASE_URL}/#/c/fake/post/nonexistent123`)
     await page.waitForTimeout(1500)
 
     await expect(page.locator('text=Post not found')).toBeVisible({ timeout: 5000 })
@@ -759,7 +759,7 @@ test.describe('Community Page', () => {
   test('community page shows header, description, and post count', async ({ page }) => {
     await fullSetup(page, 'compage')
 
-    await page.goto(`${BASE_URL}/c/compage`)
+    await page.goto(`${BASE_URL}/#/c/compage`)
     await page.waitForTimeout(1500)
 
     await expect(page.locator('text=m/compage').first()).toBeVisible()
@@ -775,7 +775,7 @@ test.describe('Community Page', () => {
     await waitForNetwork(page)
     await createWallet(page)
 
-    await page.goto(`${BASE_URL}/communities`)
+    await page.goto(`${BASE_URL}/#/communities`)
     await page.waitForTimeout(1000)
     await page.locator('text=Create a new community').click()
     await page.waitForTimeout(500)
@@ -835,22 +835,22 @@ test.describe('Network Page', () => {
     await page.reload()
     await waitForNetwork(page)
 
-    await page.goto(`${BASE_URL}/network`)
+    await page.goto(`${BASE_URL}/#/network`)
     await page.waitForTimeout(2000)
 
     // Network status title
     await expect(page.locator('text=Network Status')).toBeVisible()
-    // Should show Online status
-    await expect(page.locator('text=Online')).toBeVisible({ timeout: 10000 })
+    // Should show searching/connected status (auto-discovery UI)
+    await expect(page.locator('text=/Searching for peers|Connected to/')).toBeVisible({ timeout: 10000 })
     // Peer ID should be visible (starts with mb-)
     await expect(page.locator('text=/mb-/')).toBeVisible({ timeout: 10000 })
   })
 
   test('peer connection input is present', async ({ page }) => {
-    await page.goto(`${BASE_URL}/network`)
+    await page.goto(`${BASE_URL}/#/network`)
     await page.waitForTimeout(1000)
 
-    await expect(page.locator('text=Connect to Peer')).toBeVisible()
+    await expect(page.locator('text=Manual Connect')).toBeVisible()
     await expect(page.locator('input[placeholder*="peer ID"]')).toBeVisible()
     await expect(page.locator('button:has-text("Connect")')).toBeVisible()
   })
@@ -877,7 +877,7 @@ test.describe('Tip Button', () => {
 
     // Open page2 with different wallet
     const page2 = await context.newPage()
-    await page2.goto(`${BASE_URL}/wallet`)
+    await page2.goto(`${BASE_URL}/#/wallet`)
     await page2.waitForTimeout(500)
     // page2 already has same wallet (shared localStorage), so tip button
     // won't show for own posts. We verify it exists on page1 at least
@@ -910,7 +910,7 @@ test.describe('Wallet Seed Backup', () => {
     await page.reload()
     await createWallet(page)
 
-    await page.goto(`${BASE_URL}/wallet`)
+    await page.goto(`${BASE_URL}/#/wallet`)
     await page.waitForTimeout(1000)
 
     // Click "Show Seed" button
@@ -953,14 +953,14 @@ test.describe('Wallet Import', () => {
     expect(seed.length).toBe(128)
 
     // Disconnect wallet
-    await page.goto(`${BASE_URL}/wallet`)
+    await page.goto(`${BASE_URL}/#/wallet`)
     await page.waitForTimeout(1000)
     page.on('dialog', d => d.accept())
     await page.locator('button:has-text("Disconnect Wallet")').click()
     await page.waitForTimeout(1500)
 
     // Re-import using the same seed
-    await page.goto(`${BASE_URL}/wallet`)
+    await page.goto(`${BASE_URL}/#/wallet`)
     await page.waitForTimeout(1000)
     await page.locator('input[placeholder*="128-character"]').fill(seed)
     await page.waitForTimeout(500)
@@ -993,7 +993,7 @@ test.describe('XNO Wallet Operations', () => {
     await page.waitForTimeout(1000)
 
     // Import the pre-funded wallet via seed
-    await page.goto(`${BASE_URL}/wallet`)
+    await page.goto(`${BASE_URL}/#/wallet`)
     await page.waitForTimeout(1500)
     await page.locator('input[placeholder*="128-character"]').fill(testSeed)
     await page.waitForTimeout(500)

@@ -227,7 +227,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
-  // Initialize P2P network
+  // Initialize P2P network — discovery is fully automatic
   useEffect(() => {
     async function initP2P() {
       try {
