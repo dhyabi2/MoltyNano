@@ -35,7 +35,15 @@
       "WebFetch(domain:hub.nano.org)",
       "WebFetch(domain:cdn.jsdelivr.net)",
       "WebFetch(domain:unpkg.com)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:4fa70a76.pinit.eth.limo)",
+      "Bash(wc:*)",
+      "Bash(pinme --version:*)",
+      "Bash(pinme set-appkey:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate README with comprehensive feature documentation\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)"
     ]
   }
 }
