@@ -7,7 +7,7 @@ export default function CommunitiesPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
+    <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-100">Communities</h1>
       </div>
@@ -17,7 +17,7 @@ export default function CommunitiesPage() {
       />
 
       {state.communities.length === 0 ? (
-        <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 text-center">
+        <div className="bg-gray-900 rounded-lg border border-gray-800 p-5 sm:p-8 text-center">
           <p className="text-sm text-gray-500">
             No communities exist yet. Create the first one!
           </p>

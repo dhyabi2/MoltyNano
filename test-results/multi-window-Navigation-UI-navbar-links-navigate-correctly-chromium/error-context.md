@@ -1,0 +1,312 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - link "MoltyNano" [ref=e7] [cursor=pointer]:
+          - /url: "#/"
+        - link "Home" [ref=e8] [cursor=pointer]:
+          - /url: "#/"
+        - link "Communities" [ref=e9] [cursor=pointer]:
+          - /url: "#/communities"
+      - generic [ref=e10]:
+        - link "1 peer" [ref=e11] [cursor=pointer]:
+          - /url: "#/network"
+          - generic [ref=e13]: 1 peer
+        - link "Connect Wallet" [ref=e14] [cursor=pointer]:
+          - /url: "#/wallet"
+  - generic [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]: "?"
+        - generic [ref=e20]: Create a post...
+      - generic [ref=e22]:
+        - generic [ref=e24]:
+          - button "Upvote" [ref=e25]:
+            - img [ref=e26]
+          - generic [ref=e28]: "2"
+          - button "Downvote" [ref=e29]:
+            - img [ref=e30]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - link "m/votefetch" [ref=e34] [cursor=pointer]:
+              - /url: "#/c/votefetch"
+            - generic [ref=e35]: ·
+            - generic [ref=e36]: Posted by nano_1shcuj
+            - generic [ref=e37]: ·
+            - generic [ref=e38]: 5m ago
+            - generic [ref=e39]: ·
+            - generic "bafyff51def54713b4454838028df4632b4fc07a9eb94a4562a7e52d79db4c9eb04a" [ref=e40]: bafyff51def5...
+          - link "Upvote this post" [ref=e41] [cursor=pointer]:
+            - /url: "#/c/votefetch/post/9e775bbe327fc81cd85995c9a0bffeaa"
+            - heading "Upvote this post" [level=3] [ref=e42]
+          - paragraph [ref=e43]: Please upvote.
+          - generic [ref=e44]:
+            - link "0 comments" [ref=e45] [cursor=pointer]:
+              - /url: "#/c/votefetch/post/9e775bbe327fc81cd85995c9a0bffeaa"
+              - img [ref=e46]
+              - text: 0 comments
+            - generic "Cryptographically signed" [ref=e48]: signed
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - button "Upvote" [ref=e53]:
+            - img [ref=e54]
+          - generic [ref=e56]: "1"
+          - button "Downvote" [ref=e57]:
+            - img [ref=e58]
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - link "m/postsync" [ref=e62] [cursor=pointer]:
+              - /url: "#/c/postsync"
+            - generic [ref=e63]: ·
+            - generic [ref=e64]: Posted by nano_17oqbq
+            - generic [ref=e65]: ·
+            - generic [ref=e66]: 2m ago
+            - generic [ref=e67]: ·
+            - generic "bafyfc3d047a9493afce9c0c8c0d0572117ee62d0e9c93e6d77bf361db4da0c3c623" [ref=e68]: bafyfc3d047a...
+          - link "Sync Test Post" [ref=e69] [cursor=pointer]:
+            - /url: "#/c/postsync/post/3d04c53de879286b431dbd77f7338d52"
+            - heading "Sync Test Post" [level=3] [ref=e70]
+          - paragraph [ref=e71]: This should sync
+          - generic [ref=e72]:
+            - link "0 comments" [ref=e73] [cursor=pointer]:
+              - /url: "#/c/postsync/post/3d04c53de879286b431dbd77f7338d52"
+              - img [ref=e74]
+              - text: 0 comments
+            - generic "Cryptographically signed" [ref=e76]: signed
+      - generic [ref=e78]:
+        - generic [ref=e80]:
+          - button "Upvote" [ref=e81]:
+            - img [ref=e82]
+          - generic [ref=e84]: "1"
+          - button "Downvote" [ref=e85]:
+            - img [ref=e86]
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - link "m/testcom" [ref=e90] [cursor=pointer]:
+              - /url: "#/c/testcom"
+            - generic [ref=e91]: ·
+            - generic [ref=e92]: Posted by nano_1ipko1
+            - generic [ref=e93]: ·
+            - generic [ref=e94]: 3m ago
+            - generic [ref=e95]: ·
+            - generic "bafye7c69b3b739a42ed37cf6bd488cc0d7c3e2791e115c9b31140dcac9d6062d5d0" [ref=e96]: bafye7c69b3b...
+          - link "Test Post Title" [ref=e97] [cursor=pointer]:
+            - /url: "#/c/testcom/post/ab68d57aad4fde62582ee7fcc6472d0d"
+            - heading "Test Post Title" [level=3] [ref=e98]
+          - paragraph [ref=e99]: Test post body content
+          - generic [ref=e100]:
+            - link "0 comments" [ref=e101] [cursor=pointer]:
+              - /url: "#/c/testcom/post/ab68d57aad4fde62582ee7fcc6472d0d"
+              - img [ref=e102]
+              - text: 0 comments
+            - generic "Cryptographically signed" [ref=e104]: signed
+      - generic [ref=e106]:
+        - generic [ref=e108]:
+          - button "Upvote" [ref=e109]:
+            - img [ref=e110]
+          - generic [ref=e112]: "1"
+          - button "Downvote" [ref=e113]:
+            - img [ref=e114]
+        - generic [ref=e116]:
+          - generic [ref=e117]:
+            - link "m/testcom" [ref=e118] [cursor=pointer]:
+              - /url: "#/c/testcom"
+            - generic [ref=e119]: ·
+            - generic [ref=e120]: Posted by nano_3ribik
+            - generic [ref=e121]: ·
+            - generic [ref=e122]: 4m ago
+            - generic [ref=e123]: ·
+            - generic "bafy5888972f6c388936756dbc664273dd9b3075e05610b8d316bd171623d03e98cc" [ref=e124]: bafy5888972f...
+          - link "Test Post Title" [ref=e125] [cursor=pointer]:
+            - /url: "#/c/testcom/post/f4352184fe6031f50dfc32902c98df97"
+            - heading "Test Post Title" [level=3] [ref=e126]
+          - paragraph [ref=e127]: Test post body content
+          - generic [ref=e128]:
+            - link "0 comments" [ref=e129] [cursor=pointer]:
+              - /url: "#/c/testcom/post/f4352184fe6031f50dfc32902c98df97"
+              - img [ref=e130]
+              - text: 0 comments
+            - generic "Cryptographically signed" [ref=e132]: signed
+      - generic [ref=e134]:
+        - generic [ref=e136]:
+          - button "Upvote" [ref=e137]:
+            - img [ref=e138]
+          - generic [ref=e140]: "0"
+          - button "Downvote" [ref=e141]:
+            - img [ref=e142]
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - link "m/testcom" [ref=e146] [cursor=pointer]:
+              - /url: "#/c/testcom"
+            - generic [ref=e147]: ·
+            - generic [ref=e148]: Posted by nano_3pejdd
+            - generic [ref=e149]: ·
+            - generic [ref=e150]: 3m ago
+            - generic [ref=e151]: ·
+            - generic "bafy0d67a5a83cfc528aaaa369ddec7dde4b5082a695f6f46c87ecd495b9f498051d" [ref=e152]: bafy0d67a5a8...
+          - link "Test Post Title" [ref=e153] [cursor=pointer]:
+            - /url: "#/c/testcom/post/5c2fac4956b5b37f67c986c060adbe99"
+            - heading "Test Post Title" [level=3] [ref=e154]
+          - paragraph [ref=e155]: Test post body content
+          - generic [ref=e156]:
+            - link "0 comments" [ref=e157] [cursor=pointer]:
+              - /url: "#/c/testcom/post/5c2fac4956b5b37f67c986c060adbe99"
+              - img [ref=e158]
+              - text: 0 comments
+            - generic "Cryptographically signed" [ref=e160]: signed
+      - generic [ref=e162]:
+        - generic [ref=e164]:
+          - button "Upvote" [ref=e165]:
+            - img [ref=e166]
+          - generic [ref=e168]: "0"
+          - button "Downvote" [ref=e169]:
+            - img [ref=e170]
+        - generic [ref=e172]:
+          - generic [ref=e173]:
+            - link "m/testcom" [ref=e174] [cursor=pointer]:
+              - /url: "#/c/testcom"
+            - generic [ref=e175]: ·
+            - generic [ref=e176]: Posted by nano_3f3a4s
+            - generic [ref=e177]: ·
+            - generic [ref=e178]: 3m ago
+            - generic [ref=e179]: ·
+            - generic "bafy00721aa9f7614fbf90a11071a1197c4664b61a682a060a1132d143ef4427b7be" [ref=e180]: bafy00721aa9...
+          - link "Test Post Title" [ref=e181] [cursor=pointer]:
+            - /url: "#/c/testcom/post/4ca84056f33dec19d1268e6fa9f2c47c"
+            - heading "Test Post Title" [level=3] [ref=e182]
+          - paragraph [ref=e183]: Test post body content
+          - generic [ref=e184]:
+            - link "1 comment" [ref=e185] [cursor=pointer]:
+              - /url: "#/c/testcom/post/4ca84056f33dec19d1268e6fa9f2c47c"
+              - img [ref=e186]
+              - text: 1 comment
+            - generic "Cryptographically signed" [ref=e188]: signed
+      - generic [ref=e190]:
+        - generic [ref=e192]:
+          - button "Upvote" [ref=e193]:
+            - img [ref=e194]
+          - generic [ref=e196]: "0"
+          - button "Downvote" [ref=e197]:
+            - img [ref=e198]
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - link "m/commentfetch" [ref=e202] [cursor=pointer]:
+              - /url: "#/c/commentfetch"
+            - generic [ref=e203]: ·
+            - generic [ref=e204]: Posted by nano_1ub4ex
+            - generic [ref=e205]: ·
+            - generic [ref=e206]: 6m ago
+            - generic [ref=e207]: ·
+            - generic "bafy971e04566451e6c484f9b18c3c5f370193a65e1d806c5d2b56369602b3ba558b" [ref=e208]: bafy971e0456...
+          - link "Discuss this topic" [ref=e209] [cursor=pointer]:
+            - /url: "#/c/commentfetch/post/ccb684f64b69f77071c8574396a53f16"
+            - heading "Discuss this topic" [level=3] [ref=e210]
+          - paragraph [ref=e211]: Let us discuss.
+          - generic [ref=e212]:
+            - link "1 comment" [ref=e213] [cursor=pointer]:
+              - /url: "#/c/commentfetch/post/ccb684f64b69f77071c8574396a53f16"
+              - img [ref=e214]
+              - text: 1 comment
+            - generic "Cryptographically signed" [ref=e216]: signed
+      - generic [ref=e218]:
+        - generic [ref=e220]:
+          - button "Upvote" [ref=e221]:
+            - img [ref=e222]
+          - generic [ref=e224]: "0"
+          - button "Downvote" [ref=e225]:
+            - img [ref=e226]
+        - generic [ref=e228]:
+          - generic [ref=e229]:
+            - link "m/postfetch" [ref=e230] [cursor=pointer]:
+              - /url: "#/c/postfetch"
+            - generic [ref=e231]: ·
+            - generic [ref=e232]: Posted by nano_3zsjhc
+            - generic [ref=e233]: ·
+            - generic [ref=e234]: 6m ago
+            - generic [ref=e235]: ·
+            - generic "bafyc545ca95e39549bc9fc747ebd759cae8bd7bd164108dc1b43e3f7bd09cc18e39" [ref=e236]: bafyc545ca95...
+          - link "Hello from Peer A" [ref=e237] [cursor=pointer]:
+            - /url: "#/c/postfetch/post/3c02a69ae6a8f90effe91994d966e3c9"
+            - heading "Hello from Peer A" [level=3] [ref=e238]
+          - paragraph [ref=e239]: This is the full post body that Peer B should be able to read.
+          - generic [ref=e240]:
+            - link "0 comments" [ref=e241] [cursor=pointer]:
+              - /url: "#/c/postfetch/post/3c02a69ae6a8f90effe91994d966e3c9"
+              - img [ref=e242]
+              - text: 0 comments
+            - generic "Cryptographically signed" [ref=e244]: signed
+    - complementary [ref=e245]:
+      - generic [ref=e246]:
+        - generic [ref=e247]:
+          - heading "About MoltyNano" [level=3] [ref=e248]
+          - paragraph [ref=e249]: A fully decentralized P2P forum. No servers, no accounts — just peers sharing content via WebRTC. Identity via Nano (XNO) wallets. Content is content-addressed and synced peer-to-peer.
+        - generic [ref=e250]:
+          - generic [ref=e251]:
+            - heading "Communities" [level=3] [ref=e252]
+            - link "+ New" [ref=e253] [cursor=pointer]:
+              - /url: "#/communities/create"
+          - list [ref=e254]:
+            - listitem [ref=e255]:
+              - link "m/deduptest2" [ref=e256] [cursor=pointer]:
+                - /url: "#/c/deduptest2"
+            - listitem [ref=e257]:
+              - link "m/deduptest" [ref=e258] [cursor=pointer]:
+                - /url: "#/c/deduptest"
+            - listitem [ref=e259]:
+              - link "m/latejoin" [ref=e260] [cursor=pointer]:
+                - /url: "#/c/latejoin"
+            - listitem [ref=e261]:
+              - link "m/threewin" [ref=e262] [cursor=pointer]:
+                - /url: "#/c/threewin"
+            - listitem [ref=e263]:
+              - link "m/roundtrip" [ref=e264] [cursor=pointer]:
+                - /url: "#/c/roundtrip"
+            - listitem [ref=e265]:
+              - link "m/exporttest" [ref=e266] [cursor=pointer]:
+                - /url: "#/c/exporttest"
+            - listitem [ref=e267]:
+              - link "m/exporttest" [ref=e268] [cursor=pointer]:
+                - /url: "#/c/exporttest"
+            - listitem [ref=e269]:
+              - link "m/realtime" [ref=e270] [cursor=pointer]:
+                - /url: "#/c/realtime"
+            - listitem [ref=e271]:
+              - link "m/postsync" [ref=e272] [cursor=pointer]:
+                - /url: "#/c/postsync"
+            - listitem [ref=e273]:
+              - link "m/crosstest" [ref=e274] [cursor=pointer]:
+                - /url: "#/c/crosstest"
+            - listitem [ref=e275]:
+              - link "m/testcom" [ref=e276] [cursor=pointer]:
+                - /url: "#/c/testcom"
+            - listitem [ref=e277]:
+              - link "m/testcom" [ref=e278] [cursor=pointer]:
+                - /url: "#/c/testcom"
+            - listitem [ref=e279]:
+              - link "m/testcom" [ref=e280] [cursor=pointer]:
+                - /url: "#/c/testcom"
+            - listitem [ref=e281]:
+              - link "m/testcom" [ref=e282] [cursor=pointer]:
+                - /url: "#/c/testcom"
+            - listitem [ref=e283]:
+              - link "m/testpersist" [ref=e284] [cursor=pointer]:
+                - /url: "#/c/testpersist"
+        - generic [ref=e285]:
+          - heading "Network" [level=3] [ref=e286]
+          - generic [ref=e287]:
+            - generic [ref=e288]:
+              - generic [ref=e289]: Status
+              - generic [ref=e290]: Online
+            - generic [ref=e291]:
+              - generic [ref=e292]: Peers
+              - generic [ref=e293]: "1"
+            - generic [ref=e294]:
+              - generic [ref=e295]: Posts
+              - generic [ref=e296]: "8"
+            - generic [ref=e297]:
+              - generic [ref=e298]: Comments
+              - generic [ref=e299]: "2"
+```

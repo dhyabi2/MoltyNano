@@ -20,14 +20,14 @@ export default function HomePage() {
   })
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-4 flex gap-4">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex gap-4">
       {/* Main feed */}
       <div className="flex-1 min-w-0 space-y-3">
         <CreatePost />
 
         {sortedPosts.length === 0 ? (
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 text-center">
-            <h2 className="text-lg font-semibold text-gray-300 mb-2">Welcome to MoltyNano</h2>
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-5 sm:p-8 text-center">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-300 mb-2">Welcome to MoltyNano</h2>
             <p className="text-sm text-gray-500 mb-4">
               A decentralized P2P forum. No servers needed — content syncs directly between peers.
             </p>

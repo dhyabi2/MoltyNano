@@ -31,11 +31,11 @@ function CommentItem({ commentId, depth }: CommentProps) {
   }
 
   return (
-    <div className={`${depth > 0 ? 'ml-4 pl-3 border-l border-gray-800' : ''}`}>
+    <div className={`${depth > 0 ? 'ml-2 sm:ml-4 pl-2 sm:pl-3 border-l border-gray-800' : ''}`}>
       <div className="py-2">
         {/* Header */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-          <span className="text-gray-400" title={comment.author}>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-gray-500 mb-1">
+          <span className="text-gray-400 truncate max-w-[150px] sm:max-w-none" title={comment.author}>
             {comment.authorName || shortenAddress(comment.author)}
           </span>
           <span>·</span>
@@ -48,10 +48,10 @@ function CommentItem({ commentId, depth }: CommentProps) {
         </div>
 
         {/* Body */}
-        <p className="text-sm text-gray-300 mb-1.5 whitespace-pre-wrap">{comment.body}</p>
+        <p className="text-sm text-gray-300 mb-1.5 whitespace-pre-wrap break-words">{comment.body}</p>
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <VoteButtons targetId={comment.id} targetType="comment" horizontal />
           <button
             onClick={() => setReplying(!replying)}
@@ -64,13 +64,13 @@ function CommentItem({ commentId, depth }: CommentProps) {
 
         {/* Reply form */}
         {replying && (
-          <div className="mt-2 ml-2">
+          <div className="mt-2">
             <textarea
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder="Write a reply..."
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
-              rows={3}
+              rows={2}
             />
             <div className="flex gap-2 mt-1">
               <button
@@ -128,8 +128,8 @@ export default function CommentSection({ postId }: Props) {
               ? 'What are your thoughts?'
               : 'Connect wallet to comment with verified identity...'
           }
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
-          rows={4}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
+          rows={3}
         />
         <div className="flex justify-end mt-2">
           <button

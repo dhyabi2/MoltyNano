@@ -247,48 +247,49 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Listen for P2P messages
   useEffect(() => {
-    const unsubMsg = p2pNetwork.onMessage((msg: P2PMessage) => {
-      switch (msg.type) {
-        case 'SYNC_RESPONSE': {
-          const validatedData = validateSyncData(msg.data)
-          mergeData(validatedData).then(() => {
+    const unsubMsg = p2pNetwork.onMessage(async (msg: P2PMessage) => {
+      try {
+        switch (msg.type) {
+          case 'SYNC_RESPONSE': {
+            const validatedData = validateSyncData(msg.data)
+            const itemCount = validatedData.communities.length + validatedData.posts.length + validatedData.comments.length + validatedData.votes.length + validatedData.tips.length
+            console.log('[Store] Merging sync response:', itemCount, 'items')
+            await mergeData(validatedData)
             dispatch({ type: 'MERGE_SYNC', data: validatedData })
-          })
-          break
-        }
-        case 'NEW_COMMUNITY':
-          upsertCommunity(msg.data).then(() => {
+            console.log('[Store] Sync merge complete')
+            break
+          }
+          case 'NEW_COMMUNITY':
+            await upsertCommunity(msg.data)
             dispatch({ type: 'ADD_COMMUNITY', community: msg.data })
-          })
-          break
-        case 'NEW_POST':
-          if (!verifyPostSignature(msg.data)) {
-            console.warn('[Store] Rejected post with invalid signature:', msg.data.id)
             break
-          }
-          upsertPost(msg.data).then(() => {
+          case 'NEW_POST':
+            if (!verifyPostSignature(msg.data)) {
+              console.warn('[Store] Rejected post with invalid signature:', msg.data.id)
+              break
+            }
+            await upsertPost(msg.data)
             dispatch({ type: 'ADD_POST', post: msg.data })
-          })
-          break
-        case 'NEW_COMMENT':
-          if (!verifyCommentSignature(msg.data)) {
-            console.warn('[Store] Rejected comment with invalid signature:', msg.data.id)
             break
-          }
-          upsertComment(msg.data).then(() => {
+          case 'NEW_COMMENT':
+            if (!verifyCommentSignature(msg.data)) {
+              console.warn('[Store] Rejected comment with invalid signature:', msg.data.id)
+              break
+            }
+            await upsertComment(msg.data)
             dispatch({ type: 'ADD_COMMENT', comment: msg.data })
-          })
-          break
-        case 'VOTE':
-          upsertVote(msg.data).then(() => {
+            break
+          case 'VOTE':
+            await upsertVote(msg.data)
             dispatch({ type: 'SET_VOTE', vote: msg.data })
-          })
-          break
-        case 'TIP':
-          upsertTip(msg.data).then(() => {
+            break
+          case 'TIP':
+            await upsertTip(msg.data)
             dispatch({ type: 'ADD_TIP', tip: msg.data })
-          })
-          break
+            break
+        }
+      } catch (err) {
+        console.error('[Store] Error processing P2P message:', msg.type, err)
       }
     })
 

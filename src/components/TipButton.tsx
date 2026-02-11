@@ -87,19 +87,19 @@ export default function TipButton({ targetId, targetType, recipientAddress }: Pr
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 w-80" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-gray-100 mb-4">Send XNO Tip</h3>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 sm:p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-100 mb-3 sm:mb-4">Send XNO Tip</h3>
 
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">Amount (XNO)</label>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2">
                   {['0.001', '0.01', '0.1', '1'].map((preset) => (
                     <button
                       key={preset}
                       onClick={() => setAmount(preset)}
-                      className={`px-2 py-1 text-xs rounded border ${
+                      className={`px-2.5 py-1.5 text-xs rounded border ${
                         amount === preset
                           ? 'border-orange-500 text-orange-400'
                           : 'border-gray-700 text-gray-400 hover:border-gray-600'
@@ -117,8 +117,8 @@ export default function TipButton({ targetId, targetType, recipientAddress }: Pr
                 />
               </div>
 
-              <div className="text-xs text-gray-500">
-                To: {recipientAddress.slice(0, 20)}...
+              <div className="text-xs text-gray-500 truncate">
+                To: <span className="font-mono">{recipientAddress.slice(0, 16)}...</span>
               </div>
 
               {error && (

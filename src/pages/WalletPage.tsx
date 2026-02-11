@@ -75,14 +75,14 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
       <h1 className="text-xl font-bold text-gray-100">Nano (XNO) Wallet</h1>
 
       {!state.wallet.address ? (
         /* No wallet yet */
-        <div className="space-y-4">
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-            <h2 className="text-lg font-semibold text-gray-200 mb-3">Create New Wallet</h2>
+        <div className="space-y-3 sm:space-y-4">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-200 mb-3">Create New Wallet</h2>
             <p className="text-sm text-gray-400 mb-4">
               Generate a new Nano wallet. Your identity on MoltyNano is tied to your Nano address.
               Posts and comments are cryptographically signed with your key.
@@ -95,8 +95,8 @@ export default function WalletPage() {
             </button>
           </div>
 
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-            <h2 className="text-lg font-semibold text-gray-200 mb-3">Import Existing Wallet</h2>
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-200 mb-3">Import Existing Wallet</h2>
             <p className="text-sm text-gray-400 mb-3">
               Enter your 128-character hex seed to import an existing wallet.
             </p>
@@ -123,11 +123,11 @@ export default function WalletPage() {
         </div>
       ) : (
         /* Wallet exists */
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Wallet info */}
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
             <div className="flex items-start justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-200">Your Wallet</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-200">Your Wallet</h2>
               <button
                 onClick={refreshBalance}
                 disabled={refreshing}
@@ -145,16 +145,16 @@ export default function WalletPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-gray-500 block mb-1">Balance</label>
-                  <div className="text-lg font-semibold text-green-400">
+                  <div className="text-base sm:text-lg font-semibold text-green-400">
                     {rawToNano(state.wallet.balance)} XNO
                   </div>
                 </div>
                 <div>
                   <label className="text-xs text-gray-500 block mb-1">Pending</label>
-                  <div className="text-lg font-semibold text-yellow-400">
+                  <div className="text-base sm:text-lg font-semibold text-yellow-400">
                     {rawToNano(state.wallet.pending)} XNO
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export default function WalletPage() {
           </div>
 
           {/* Display name */}
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-gray-200 mb-3">Display Name</h2>
             <div className="flex gap-2">
               <input
@@ -192,7 +192,7 @@ export default function WalletPage() {
           </div>
 
           {/* Send XNO */}
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-gray-200 mb-3">Send XNO</h2>
             <div className="space-y-2">
               <input
@@ -227,7 +227,7 @@ export default function WalletPage() {
           </div>
 
           {/* Seed backup */}
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-gray-200 mb-3">Backup Seed</h2>
             <p className="text-xs text-gray-500 mb-3">
               Save this seed to recover your wallet. Anyone with this seed can access your funds.
@@ -247,7 +247,7 @@ export default function WalletPage() {
           </div>
 
           {/* Logout */}
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 sm:p-6">
             <button
               onClick={() => {
                 if (confirm('Are you sure? Make sure you have backed up your seed!')) {

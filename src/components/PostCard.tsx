@@ -24,14 +24,14 @@ export default function PostCard({ postId }: Props) {
     <div className="bg-gray-900 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors">
       <div className="flex">
         {/* Vote column */}
-        <div className="p-3 flex items-start">
+        <div className="p-2 sm:p-3 flex items-start">
           <VoteButtons targetId={post.id} targetType="post" />
         </div>
 
         {/* Content */}
-        <div className="flex-1 py-3 pr-4">
+        <div className="flex-1 min-w-0 py-2 sm:py-3 pr-3 sm:pr-4">
           {/* Meta line */}
-          <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-gray-500 mb-1">
             {community && (
               <>
                 <Link
@@ -43,22 +43,13 @@ export default function PostCard({ postId }: Props) {
                 <span>·</span>
               </>
             )}
-            <span>
-              Posted by{' '}
+            <span className="truncate">
               <span className="text-gray-400" title={post.author}>
                 {post.authorName || shortenAddress(post.author)}
               </span>
             </span>
             <span>·</span>
             <span>{timeAgo}</span>
-            {post.cid && (
-              <>
-                <span>·</span>
-                <span className="text-gray-600 font-mono" title={post.cid}>
-                  {post.cid.slice(0, 12)}...
-                </span>
-              </>
-            )}
           </div>
 
           {/* Title */}
@@ -66,21 +57,21 @@ export default function PostCard({ postId }: Props) {
             to={`/c/${community?.name || 'general'}/post/${post.id}`}
             className="block"
           >
-            <h3 className="text-base font-medium text-gray-100 hover:text-orange-400 mb-1">
+            <h3 className="text-sm sm:text-base font-medium text-gray-100 hover:text-orange-400 mb-1 break-words">
               {post.title}
             </h3>
           </Link>
 
           {/* Body preview */}
           {post.body && (
-            <p className="text-sm text-gray-400 line-clamp-3 mb-2">{post.body}</p>
+            <p className="text-sm text-gray-400 line-clamp-3 mb-2 break-words">{post.body}</p>
           )}
 
           {/* Action bar */}
-          <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-gray-500">
             <Link
               to={`/c/${community?.name || 'general'}/post/${post.id}`}
-              className="flex items-center gap-1 hover:text-gray-300"
+              className="flex items-center gap-1 hover:text-gray-300 py-1"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
@@ -89,7 +80,7 @@ export default function PostCard({ postId }: Props) {
             </Link>
             {tipTotal > 0 && (
               <span className="text-green-500">
-                {tipTotal.toFixed(4)} XNO tipped
+                {tipTotal.toFixed(4)} XNO
               </span>
             )}
             {post.signature && (

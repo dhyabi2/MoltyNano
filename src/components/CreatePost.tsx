@@ -48,7 +48,7 @@ export default function CreatePost({ communityId, communityName }: Props) {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+    <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 sm:p-4">
       <h3 className="text-sm font-semibold text-gray-200 mb-3">Create a Post</h3>
 
       {!communityId && (
@@ -80,15 +80,15 @@ export default function CreatePost({ communityId, communityName }: Props) {
         onChange={(e) => setBody(e.target.value)}
         placeholder="Text (optional)"
         className="w-full mb-3 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
-        rows={5}
+        rows={4}
       />
 
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-xs text-gray-500 truncate">
           Posting as {state.wallet.displayName || 'Anonymous'}
           {state.wallet.address ? ' (signed)' : ''}
         </span>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setExpanded(false)}
             className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded"

@@ -77,7 +77,10 @@
       "WebFetch(domain:moltynano.com)",
       "WebFetch(domain:eth-limo.gitbook.io)",
       "WebFetch(domain:api.github.com)",
-      "Bash(IPFS_PREVIEW_URL=\"https://pinme.eth.limo/#/preview/\" SECRET_KEY=\"\" npm run build:*)"
+      "Bash(IPFS_PREVIEW_URL=\"https://pinme.eth.limo/#/preview/\" SECRET_KEY=\"\" npm run build:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(python3:*)"
     ]
   }
 }

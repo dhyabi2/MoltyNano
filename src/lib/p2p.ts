@@ -1,7 +1,7 @@
 import { joinRoom, selfId } from 'trystero/torrent'
 import type { Room } from 'trystero'
 import type { P2PMessage } from '../types'
-import { getAllData, getDataSince, mergeData } from './db'
+import { getAllData, getDataSince } from './db'
 
 type MessageHandler = (msg: P2PMessage, peerId: string) => void
 
@@ -9,12 +9,30 @@ const ROOM_ID = 'moltynano-main'
 const APP_ID = 'moltynano'
 
 // ── ICE servers for NAT traversal ────────────────────────────────────────
+// STUN discovers public IP; TURN relays traffic when direct connection fails
+// (symmetric NATs, corporate firewalls, mobile carriers, etc.)
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
   { urls: 'stun:stun3.l.google.com:19302' },
   { urls: 'stun:stun4.l.google.com:19302' },
+  // Free TURN relays — needed when STUN-only fails (most real-world networks)
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turns:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
 ]
 
 // Allow overriding relay URLs via localStorage (for testing)
@@ -125,7 +143,9 @@ class P2PNetwork {
     this.sendMsg = send
     receive((data: P2PMessage, peerId: string) => {
       if (this.isMessageSeen(data)) return
-      this.handleMessage(data, peerId)
+      this.handleMessage(data, peerId).catch(err => {
+        console.error('[P2P] Unhandled error in message handler:', err)
+      })
     })
 
     // ── Peer join ──
@@ -179,26 +199,36 @@ class P2PNetwork {
   // ── Message handling ──────────────────────────────────────────────────
 
   private async handleMessage(msg: P2PMessage, fromPeerId: string) {
-    switch (msg.type) {
-      case 'SYNC_REQUEST': {
-        const data = msg.since ? await getDataSince(msg.since) : await getAllData()
-        this.sendToPeer(fromPeerId, { type: 'SYNC_RESPONSE', data })
-        break
+    try {
+      switch (msg.type) {
+        case 'SYNC_REQUEST': {
+          console.log('[P2P] Sync request from', fromPeerId, msg.since ? `(delta since ${new Date(msg.since).toISOString()})` : '(full)')
+          const data = msg.since ? await getDataSince(msg.since) : await getAllData()
+          const itemCount = data.communities.length + data.posts.length + data.comments.length + data.votes.length + data.tips.length
+          console.log('[P2P] Sending sync response to', fromPeerId, `(${itemCount} items)`)
+          this.sendToPeer(fromPeerId, { type: 'SYNC_RESPONSE', data })
+          break
+        }
+        case 'SYNC_RESPONSE': {
+          const d = msg.data as { communities?: unknown[]; posts?: unknown[]; comments?: unknown[]; votes?: unknown[]; tips?: unknown[] }
+          const itemCount = (d.communities?.length || 0) + (d.posts?.length || 0) + (d.comments?.length || 0) + (d.votes?.length || 0) + (d.tips?.length || 0)
+          console.log('[P2P] Received sync response from', fromPeerId, `(${itemCount} items)`)
+          this.lastSyncTime.set(fromPeerId, Date.now())
+          // Let useStore handle mergeData with validation — don't merge unvalidated data here
+          this.notifyMessageHandlers(msg, fromPeerId)
+          break
+        }
+        case 'PEER_LIST': {
+          // No-op: Trystero handles discovery automatically
+          break
+        }
+        default: {
+          this.notifyMessageHandlers(msg, fromPeerId)
+          break
+        }
       }
-      case 'SYNC_RESPONSE': {
-        await mergeData(msg.data)
-        this.lastSyncTime.set(fromPeerId, Date.now())
-        this.notifyMessageHandlers(msg, fromPeerId)
-        break
-      }
-      case 'PEER_LIST': {
-        // No-op: Trystero handles discovery automatically
-        break
-      }
-      default: {
-        this.notifyMessageHandlers(msg, fromPeerId)
-        break
-      }
+    } catch (err) {
+      console.error('[P2P] Error handling message from', fromPeerId, ':', err)
     }
   }
 
@@ -212,7 +242,9 @@ class P2PNetwork {
 
   sendToPeer(peerId: string, msg: P2PMessage) {
     if (this.sendMsg && this.connectedPeers.has(peerId)) {
-      this.sendMsg(msg, peerId)
+      this.sendMsg(msg, peerId).catch(err => {
+        console.error('[P2P] Failed to send to peer', peerId, ':', err)
+      })
     }
   }
 
@@ -220,7 +252,9 @@ class P2PNetwork {
     let sentToAnyPeer = false
 
     if (this.sendMsg && this.connectedPeers.size > 0) {
-      this.sendMsg(msg)
+      this.sendMsg(msg).catch(err => {
+        console.error('[P2P] Broadcast failed:', err)
+      })
       sentToAnyPeer = true
     }
 

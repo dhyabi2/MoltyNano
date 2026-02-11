@@ -12,8 +12,8 @@ export default function PostPage() {
   const post = state.posts.find((p) => p.id === postId)
   if (!post) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-300 mb-2">Post not found</h2>
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-8 text-center">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-300 mb-2">Post not found</h2>
         <p className="text-sm text-gray-500">
           It may not have synced yet, or you might not be connected to peers who have it.
         </p>
@@ -30,11 +30,11 @@ export default function PostPage() {
   const timeAgo = getTimeAgo(post.createdAt)
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 space-y-3">
+    <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3">
       {/* Post */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-3 sm:p-4">
         {/* Meta */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-gray-500 mb-2">
           {community && (
             <>
               <Link
@@ -46,7 +46,7 @@ export default function PostPage() {
               <span>·</span>
             </>
           )}
-          <span>
+          <span className="truncate max-w-[200px]">
             Posted by{' '}
             <span className="text-gray-400" title={post.author}>
               {post.authorName || shortenAddress(post.author)}
@@ -57,17 +57,17 @@ export default function PostPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-semibold text-gray-100 mb-3">{post.title}</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-100 mb-3 break-words">{post.title}</h1>
 
         {/* Body */}
         {post.body && (
-          <div className="text-sm text-gray-300 mb-4 whitespace-pre-wrap leading-relaxed">
+          <div className="text-sm text-gray-300 mb-4 whitespace-pre-wrap leading-relaxed break-words">
             {post.body}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-4 pt-2 border-t border-gray-800">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2 border-t border-gray-800">
           <VoteButtons targetId={post.id} targetType="post" horizontal />
           <span className="text-xs text-gray-500">
             {commentCount} comment{commentCount !== 1 ? 's' : ''}
@@ -79,7 +79,7 @@ export default function PostPage() {
           />
           {tipTotal > 0 && (
             <span className="text-xs text-green-500">
-              {tipTotal.toFixed(4)} XNO tipped
+              {tipTotal.toFixed(4)} XNO
             </span>
           )}
           {post.signature && (
@@ -88,15 +88,15 @@ export default function PostPage() {
             </span>
           )}
           {post.cid && (
-            <span className="text-xs font-mono text-gray-600" title={post.cid}>
-              CID: {post.cid.slice(0, 16)}...
+            <span className="hidden sm:inline text-xs font-mono text-gray-600 truncate max-w-[120px]" title={post.cid}>
+              CID: {post.cid.slice(0, 12)}...
             </span>
           )}
         </div>
       </div>
 
       {/* Comments */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-3 sm:p-4">
         <h2 className="text-sm font-semibold text-gray-300 mb-4">
           Comments ({commentCount})
         </h2>
