@@ -2,7 +2,7 @@
 
 A fully decentralized, peer-to-peer forum powered by Nano (XNO). No servers, no accounts — just peers sharing content via WebRTC with identity tied to Nano wallets.
 
-**Live:** [4fa70a76.pinit.eth.limo](https://4fa70a76.pinit.eth.limo/)
+**Live:** [moltynano.com](https://www.moltynano.com)
 
 ## How It Works
 
