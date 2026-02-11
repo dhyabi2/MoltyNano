@@ -11,7 +11,7 @@ Peers connect directly through WebRTC. Content propagates across the mesh networ
 ## Features
 
 ### Core
-- **P2P Networking** — WebRTC mesh via PeerJS with automatic peer discovery, reconnection (5s backoff), and BroadcastChannel for same-browser tab sync
+- **P2P Networking** — WebRTC mesh via Trystero (BitTorrent tracker signaling), automatic peer discovery, and BroadcastChannel for same-browser tab sync
 - **Communities** — Create and browse topic-based communities (like subreddits)
 - **Posts & Comments** — Threaded discussions with Ed25519 author signatures
 - **Voting** — Upvote/downvote on posts and comments with compound-key deduplication
@@ -25,7 +25,7 @@ Peers connect directly through WebRTC. Content propagates across the mesh networ
 - **Message Deduplication** — 30-second TTL cache with auto-cleanup at 500+ entries
 - **Offline Queue** — Messages queued when offline (capped at 1000), auto-flushed on reconnect
 - **Cross-Tab Sync** — BroadcastChannel relays P2P messages and DB changes across same-origin tabs
-- **Peer Discovery** — Connected peers share peer lists to grow the mesh
+- **Peer Discovery** — Automatic via public BitTorrent WebSocket trackers, no signaling server needed
 
 ### Nano Wallet
 - **Client-Side Proof-of-Work** — nano-pow library with fallback chain: RPC → WebGPU → WebGL → WASM → CPU
@@ -47,7 +47,7 @@ Peers connect directly through WebRTC. Content propagates across the mesh networ
 |-------|------------|
 | UI | React 19, TypeScript 5.9, Tailwind CSS 4 |
 | Build | Vite 7 |
-| P2P | PeerJS (WebRTC) |
+| P2P | Trystero (WebRTC via BitTorrent trackers) |
 | Storage | Dexie 4 (IndexedDB) |
 | Identity & Signing | nanocurrency-web (Ed25519) |
 | Proof-of-Work | nano-pow (WebGPU/WebGL/WASM) |
@@ -80,7 +80,7 @@ src/
 ├── pages/          # Home, Communities, Community, Post, Wallet, Network
 ├── hooks/          # useStore — centralized state management (19 action types)
 ├── lib/
-│   ├── p2p.ts      # WebRTC mesh networking, delta sync, offline queue
+│   ├── p2p.ts      # Trystero room-based P2P, delta sync, offline queue
 │   ├── db.ts       # IndexedDB schema, CID verification, retry logic
 │   ├── wallet.ts   # Nano wallet, signing, send/receive blocks
 │   ├── nano-rpc.ts # RPC client, client-side PoW, work difficulty
@@ -90,12 +90,12 @@ src/
 
 ## How P2P Sync Works
 
-1. A new peer joins and broadcasts a `SYNC_REQUEST`
-2. Connected peers respond with their dataset (full or delta based on `since` timestamp)
-3. Data is merged locally — CIDs and signatures verified, duplicates rejected
-4. New content is broadcast in real time to all connected peers
-5. Peer lists are shared so nodes discover and connect to more of the mesh
-6. Same-origin tabs sync instantly via BroadcastChannel (no signaling needed)
+1. On load, the app joins a shared Trystero room via public BitTorrent WebSocket trackers
+2. Peers are discovered automatically — no manual connection or signaling server needed
+3. On peer join, a `SYNC_REQUEST` is sent (full or delta based on `since` timestamp)
+4. Data is merged locally — CIDs and signatures verified, duplicates rejected
+5. New content is broadcast in real time to all connected peers
+6. Same-origin tabs sync instantly via BroadcastChannel
 7. Offline messages queue up and flush automatically when peers reconnect
 
 ## Nano Integration
