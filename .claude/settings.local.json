@@ -94,7 +94,8 @@
       "Bash(ADDRESS=\"wC39COMMjuTzslI1AyzFPcOSDTB3\")",
       "Bash(JWT=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyIjoid2MzOWNvbW1qdXR6c2xpMWF5emZwY29zZHRiMyIsImV4cCI6MTc3MzMzMTc4M30.2MYGdI9vcfPok2L5uKwQXOMJivAA7_t3Rz0tRXQD96E\")",
       "Bash(__NEW_LINE_0f3a9577083953bd__ echo \"Binding moltynano.com...\")",
-      "Bash(__NEW_LINE_0f3a9577083953bd__ echo \"\")"
+      "Bash(__NEW_LINE_0f3a9577083953bd__ echo \"\")",
+      "Bash(zip:*)"
     ]
   }
 }
