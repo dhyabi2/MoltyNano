@@ -89,8 +89,28 @@ export interface SyncData {
   tips: Tip[]
 }
 
+export interface EncryptedWalletStore {
+  version: 2
+  address: string
+  publicKey: string
+  displayName: string
+  balance: string
+  pending: string
+  encrypted: { salt: string; iv: string; ct: string }
+  passwordSalt: string
+  passwordHash: string
+}
+
+export interface WalletSecrets {
+  seed: string
+  privateKey: string
+}
+
+export type WalletLockState = 'no_wallet' | 'locked' | 'unlocked'
+
 export interface AppState {
   wallet: WalletState
+  walletLockState: WalletLockState
   communities: Community[]
   posts: Post[]
   comments: Comment[]

@@ -1,6 +1,7 @@
 import { wallet as nanoWallet, tools as nanoTools, block as nanoBlock } from 'nanocurrency-web'
 import { getAccountInfo, generateWork, processBlock, getPendingBlocks } from './nano-rpc'
-import type { WalletState } from '../types'
+import { encrypt, decrypt, hashPassword, verifyPassword, uint8ToBase64, base64ToUint8 } from './crypto'
+import type { WalletState, EncryptedWalletStore, WalletSecrets } from '../types'
 
 const STORAGE_KEY = 'moltynano_wallet'
 const DEFAULT_REP = 'nano_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4' // nano foundation
@@ -123,18 +124,98 @@ export function safeBigInt(value: string | undefined | null, fallback = '0'): bi
   }
 }
 
-export function saveWallet(state: WalletState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+export async function saveWalletEncrypted(state: WalletState, password: string): Promise<void> {
+  if (!state.seed || !state.privateKey) {
+    throw new Error('Cannot encrypt wallet without seed and privateKey')
+  }
+  const secrets: WalletSecrets = { seed: state.seed, privateKey: state.privateKey }
+  const encrypted = await encrypt(JSON.stringify(secrets), password)
+  const passwordSaltBytes = crypto.getRandomValues(new Uint8Array(16))
+  const passwordSalt = uint8ToBase64(passwordSaltBytes)
+  const passwordHashValue = await hashPassword(password, passwordSaltBytes)
+  const store: EncryptedWalletStore = {
+    version: 2,
+    address: state.address!,
+    publicKey: state.publicKey!,
+    displayName: state.displayName,
+    balance: state.balance,
+    pending: state.pending,
+    encrypted,
+    passwordSalt,
+    passwordHash: passwordHashValue,
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
 }
 
-export function loadWallet(): WalletState | null {
+export function loadWalletPublic(): WalletState | null {
   const stored = localStorage.getItem(STORAGE_KEY)
   if (!stored) return null
   try {
-    return JSON.parse(stored) as WalletState
+    const parsed = JSON.parse(stored)
+    if (!parsed.version || parsed.version < 2) {
+      return parsed as WalletState
+    }
+    const store = parsed as EncryptedWalletStore
+    return {
+      seed: null,
+      privateKey: null,
+      address: store.address,
+      publicKey: store.publicKey,
+      displayName: store.displayName,
+      balance: store.balance,
+      pending: store.pending,
+    }
   } catch {
     return null
   }
+}
+
+export async function unlockWallet(password: string): Promise<WalletState> {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) throw new Error('No wallet found')
+  const parsed = JSON.parse(stored)
+  if (!parsed.version || parsed.version < 2) {
+    throw new Error('Wallet is not encrypted. Set a password first.')
+  }
+  const store = parsed as EncryptedWalletStore
+  const isValid = await verifyPassword(password, base64ToUint8(store.passwordSalt), store.passwordHash)
+  if (!isValid) throw new Error('Incorrect password')
+  const secretsJson = await decrypt(store.encrypted, password)
+  const secrets: WalletSecrets = JSON.parse(secretsJson)
+  return {
+    seed: secrets.seed,
+    privateKey: secrets.privateKey,
+    address: store.address,
+    publicKey: store.publicKey,
+    displayName: store.displayName,
+    balance: store.balance,
+    pending: store.pending,
+  }
+}
+
+export function isLegacyWallet(): boolean {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return false
+  try {
+    const parsed = JSON.parse(stored)
+    return !parsed.version || parsed.version < 2
+  } catch {
+    return false
+  }
+}
+
+export function hasStoredWallet(): boolean {
+  return localStorage.getItem(STORAGE_KEY) !== null
+}
+
+export function updateWalletPublicData(updates: Partial<Pick<WalletState, 'balance' | 'pending' | 'displayName'>>): void {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return
+  try {
+    const parsed = JSON.parse(stored)
+    Object.assign(parsed, updates)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed))
+  } catch { /* ignore */ }
 }
 
 export function clearWallet(): void {

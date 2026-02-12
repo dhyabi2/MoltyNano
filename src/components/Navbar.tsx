@@ -40,8 +40,13 @@ export default function Navbar() {
           {/* Wallet */}
           <Link
             to="/wallet"
-            className="text-xs px-3 py-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-300"
+            className="text-xs px-3 py-2 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center gap-1.5"
           >
+            {state.walletLockState === 'locked' && (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-yellow-500">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+              </svg>
+            )}
             {state.wallet.address
               ? shortenAddress(state.wallet.address)
               : 'Wallet'}

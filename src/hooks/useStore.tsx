@@ -4,6 +4,7 @@ import {
   useReducer,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from 'react'
 import type {
@@ -15,14 +16,35 @@ import type {
   Tip,
   P2PMessage,
   WalletState,
+  WalletLockState,
+  EncryptedWalletStore,
 } from '../types'
-import { db, upsertCommunity, upsertPost, upsertComment, upsertVote, upsertTip, getAllData, mergeData, validateSyncData, onDBChange, checkDataIntegrity } from '../lib/db'
+import { upsertCommunity, upsertPost, upsertComment, upsertVote, upsertTip, getAllData, mergeData, validateSyncData, onDBChange, checkDataIntegrity } from '../lib/db'
 import { p2pNetwork } from '../lib/p2p'
 import { hashContent, generateId } from '../lib/ipfs'
-import { signMessage, loadWallet, saveWallet, createWallet, walletFromSeed, verifyPostSignature, verifyCommentSignature, verifyCommunitySignature, verifyVoteSignature, verifyTipSignature } from '../lib/wallet'
+import {
+  signMessage,
+  loadWalletPublic,
+  saveWalletEncrypted,
+  createWallet,
+  walletFromSeed,
+  verifyPostSignature,
+  verifyCommentSignature,
+  verifyCommunitySignature,
+  verifyVoteSignature,
+  verifyTipSignature,
+  isLegacyWallet,
+  hasStoredWallet,
+  unlockWallet as unlockWalletFromStorage,
+  updateWalletPublicData,
+} from '../lib/wallet'
+
+const AUTO_LOCK_TIMEOUT = 15 * 60 * 1000
 
 type Action =
   | { type: 'SET_WALLET'; wallet: WalletState }
+  | { type: 'SET_LOCK_STATE'; lockState: WalletLockState }
+  | { type: 'LOCK_WALLET' }
   | { type: 'ADD_COMMUNITY'; community: Community }
   | { type: 'ADD_POST'; post: Post }
   | { type: 'ADD_COMMENT'; comment: Comment }
@@ -31,7 +53,7 @@ type Action =
   | { type: 'SET_PEERS'; peers: string[] }
   | { type: 'SET_PEER_ID'; peerId: string }
   | { type: 'SET_NETWORK_READY'; ready: boolean }
-  | { type: 'LOAD_ALL'; data: Omit<AppState, 'wallet' | 'connectedPeers' | 'myPeerId' | 'networkReady'> }
+  | { type: 'LOAD_ALL'; data: Omit<AppState, 'wallet' | 'walletLockState' | 'connectedPeers' | 'myPeerId' | 'networkReady'> }
   | { type: 'MERGE_SYNC'; data: { communities: Community[]; posts: Post[]; comments: Comment[]; votes: Vote[]; tips: Tip[] } }
 
 const initialState: AppState = {
@@ -44,6 +66,7 @@ const initialState: AppState = {
     pending: '0',
     displayName: 'Anonymous',
   },
+  walletLockState: 'no_wallet',
   communities: [],
   posts: [],
   comments: [],
@@ -58,6 +81,20 @@ function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_WALLET':
       return { ...state, wallet: action.wallet }
+
+    case 'SET_LOCK_STATE':
+      return { ...state, walletLockState: action.lockState }
+
+    case 'LOCK_WALLET':
+      return {
+        ...state,
+        walletLockState: 'locked',
+        wallet: {
+          ...state.wallet,
+          seed: null,
+          privateKey: null,
+        },
+      }
 
     case 'ADD_COMMUNITY':
       if (state.communities.find((c) => c.id === action.community.id)) return state
@@ -152,7 +189,11 @@ function reducer(state: AppState, action: Action): AppState {
 interface StoreContextValue {
   state: AppState
   dispatch: React.Dispatch<Action>
-  initWallet: (seed?: string) => void
+  initWalletWithPassword: (password: string, seed?: string) => Promise<void>
+  setupPassword: (password: string) => Promise<void>
+  unlockWallet: (password: string) => Promise<void>
+  lockWallet: () => void
+  changePassword: (oldPassword: string, newPassword: string) => Promise<void>
   createCommunity: (name: string, description: string) => Promise<Community>
   createPost: (title: string, body: string, communityId: string) => Promise<Post>
   createComment: (body: string, postId: string, parentId: string | null) => Promise<Comment>
@@ -168,6 +209,9 @@ const StoreContext = createContext<StoreContextValue | null>(null)
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const autoLockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const stateRef = useRef(state)
+  stateRef.current = state
 
   // Load data from IndexedDB on mount
   useEffect(() => {
@@ -180,9 +224,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Initialize wallet from localStorage
   useEffect(() => {
-    const saved = loadWallet()
-    if (saved) {
-      dispatch({ type: 'SET_WALLET', wallet: saved })
+    if (!hasStoredWallet()) {
+      dispatch({ type: 'SET_LOCK_STATE', lockState: 'no_wallet' })
+      return
+    }
+    if (isLegacyWallet()) {
+      const saved = loadWalletPublic()
+      if (saved) {
+        dispatch({ type: 'SET_WALLET', wallet: saved })
+        dispatch({ type: 'SET_LOCK_STATE', lockState: 'unlocked' })
+      }
+      return
+    }
+    const publicData = loadWalletPublic()
+    if (publicData) {
+      dispatch({ type: 'SET_WALLET', wallet: publicData })
+      dispatch({ type: 'SET_LOCK_STATE', lockState: 'locked' })
     }
   }, [])
 
@@ -212,20 +269,103 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (e.key === 'moltynano_wallet') {
         if (e.newValue) {
           try {
-            const wallet = JSON.parse(e.newValue) as WalletState
-            dispatch({ type: 'SET_WALLET', wallet })
+            const parsed = JSON.parse(e.newValue)
+            if (parsed.version === 2) {
+              const store = parsed as EncryptedWalletStore
+              const current = stateRef.current
+              if (current.walletLockState === 'unlocked' && current.wallet.seed) {
+                dispatch({
+                  type: 'SET_WALLET',
+                  wallet: {
+                    ...current.wallet,
+                    balance: store.balance,
+                    pending: store.pending,
+                    displayName: store.displayName,
+                  },
+                })
+              } else {
+                dispatch({
+                  type: 'SET_WALLET',
+                  wallet: {
+                    seed: null,
+                    privateKey: null,
+                    address: store.address,
+                    publicKey: store.publicKey,
+                    displayName: store.displayName,
+                    balance: store.balance,
+                    pending: store.pending,
+                  },
+                })
+                dispatch({ type: 'SET_LOCK_STATE', lockState: 'locked' })
+              }
+            } else {
+              const wallet = parsed as WalletState
+              dispatch({ type: 'SET_WALLET', wallet })
+            }
           } catch {
             // Invalid wallet data, ignore
           }
         } else {
-          // Wallet was cleared in another tab
           dispatch({ type: 'SET_WALLET', wallet: initialState.wallet })
+          dispatch({ type: 'SET_LOCK_STATE', lockState: 'no_wallet' })
         }
       }
     }
     window.addEventListener('storage', handleStorageChange)
     return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
+
+  // Auto-lock timer
+  const clearAutoLockTimer = useCallback(() => {
+    if (autoLockTimerRef.current) {
+      clearTimeout(autoLockTimerRef.current)
+      autoLockTimerRef.current = null
+    }
+  }, [])
+
+  const resetAutoLockTimer = useCallback(() => {
+    clearAutoLockTimer()
+    autoLockTimerRef.current = setTimeout(() => {
+      dispatch({ type: 'LOCK_WALLET' })
+    }, AUTO_LOCK_TIMEOUT)
+  }, [clearAutoLockTimer])
+
+  useEffect(() => {
+    if (state.walletLockState !== 'unlocked' || isLegacyWallet()) return
+
+    const handleActivity = () => resetAutoLockTimer()
+    window.addEventListener('mousedown', handleActivity)
+    window.addEventListener('keydown', handleActivity)
+    window.addEventListener('touchstart', handleActivity)
+    resetAutoLockTimer()
+
+    return () => {
+      clearAutoLockTimer()
+      window.removeEventListener('mousedown', handleActivity)
+      window.removeEventListener('keydown', handleActivity)
+      window.removeEventListener('touchstart', handleActivity)
+    }
+  }, [state.walletLockState, resetAutoLockTimer, clearAutoLockTimer])
+
+  // Lock on extended tab hide
+  useEffect(() => {
+    if (state.walletLockState !== 'unlocked' || isLegacyWallet()) return
+
+    let hiddenAt: number | null = null
+    const handleVisibility = () => {
+      if (document.hidden) {
+        hiddenAt = Date.now()
+      } else if (hiddenAt && Date.now() - hiddenAt > AUTO_LOCK_TIMEOUT) {
+        dispatch({ type: 'LOCK_WALLET' })
+        hiddenAt = null
+      } else {
+        hiddenAt = null
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [state.walletLockState])
 
   // Initialize P2P network — discovery is fully automatic
   useEffect(() => {
@@ -315,8 +455,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const initWallet = useCallback(
-    (seed?: string) => {
+  const initWalletWithPassword = useCallback(
+    async (password: string, seed?: string) => {
       let w
       if (seed) {
         const derived = walletFromSeed(seed)
@@ -333,14 +473,55 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         pending: '0',
         displayName: 'nano_' + w.address.slice(5, 11),
       }
-      saveWallet(walletState)
+      await saveWalletEncrypted(walletState, password)
       dispatch({ type: 'SET_WALLET', wallet: walletState })
+      dispatch({ type: 'SET_LOCK_STATE', lockState: 'unlocked' })
+      resetAutoLockTimer()
+    },
+    [resetAutoLockTimer]
+  )
+
+  const setupPassword = useCallback(
+    async (password: string) => {
+      const w = stateRef.current.wallet
+      if (!w.seed || !w.privateKey) {
+        throw new Error('No wallet secrets to encrypt')
+      }
+      await saveWalletEncrypted(w, password)
+      dispatch({ type: 'SET_LOCK_STATE', lockState: 'unlocked' })
+      resetAutoLockTimer()
+    },
+    [resetAutoLockTimer]
+  )
+
+  const unlockWalletAction = useCallback(
+    async (password: string) => {
+      const fullWallet = await unlockWalletFromStorage(password)
+      dispatch({ type: 'SET_WALLET', wallet: fullWallet })
+      dispatch({ type: 'SET_LOCK_STATE', lockState: 'unlocked' })
+      resetAutoLockTimer()
+    },
+    [resetAutoLockTimer]
+  )
+
+  const lockWalletAction = useCallback(() => {
+    dispatch({ type: 'LOCK_WALLET' })
+    clearAutoLockTimer()
+  }, [clearAutoLockTimer])
+
+  const changePassword = useCallback(
+    async (oldPassword: string, newPassword: string) => {
+      const fullWallet = await unlockWalletFromStorage(oldPassword)
+      await saveWalletEncrypted(fullWallet, newPassword)
     },
     []
   )
 
   const createCommunityAction = useCallback(
     async (name: string, description: string): Promise<Community> => {
+      if (stateRef.current.walletLockState === 'locked') {
+        throw new Error('Wallet is locked. Unlock to create content.')
+      }
       const id = generateId()
       const community: Community = {
         id,
@@ -366,6 +547,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const createPostAction = useCallback(
     async (title: string, body: string, communityId: string): Promise<Post> => {
+      if (stateRef.current.walletLockState === 'locked') {
+        throw new Error('Wallet is locked. Unlock to create content.')
+      }
       const id = generateId()
       const postData = { id, title, body, communityId, createdAt: Date.now() }
       const signature = state.wallet.privateKey
@@ -389,6 +573,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const createCommentAction = useCallback(
     async (body: string, postId: string, parentId: string | null): Promise<Comment> => {
+      if (stateRef.current.walletLockState === 'locked') {
+        throw new Error('Wallet is locked. Unlock to create content.')
+      }
       const id = generateId()
       const commentData = { id, body, postId, parentId, createdAt: Date.now() }
       const signature = state.wallet.privateKey
@@ -412,6 +599,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const castVoteAction = useCallback(
     async (targetId: string, targetType: 'post' | 'comment', value: 1 | -1) => {
+      if (stateRef.current.walletLockState === 'locked') {
+        throw new Error('Wallet is locked. Unlock to vote.')
+      }
       const voter = state.wallet.address || 'anonymous'
       const existing = state.votes.find(
         (v) => v.targetId === targetId && v.voter === voter
@@ -481,7 +671,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       value={{
         state,
         dispatch,
-        initWallet,
+        initWalletWithPassword,
+        setupPassword,
+        unlockWallet: unlockWalletAction,
+        lockWallet: lockWalletAction,
+        changePassword,
         createCommunity: createCommunityAction,
         createPost: createPostAction,
         createComment: createCommentAction,
