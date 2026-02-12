@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../hooks/useStore'
+import { MAX_TITLE_LENGTH, MAX_BODY_LENGTH } from '../lib/db'
 
 interface Props {
   communityId?: string
@@ -70,6 +71,7 @@ export default function CreatePost({ communityId, communityName }: Props) {
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        maxLength={MAX_TITLE_LENGTH}
         placeholder="Title"
         className="w-full mb-3 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500"
         autoFocus
@@ -78,6 +80,7 @@ export default function CreatePost({ communityId, communityName }: Props) {
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
+        maxLength={MAX_BODY_LENGTH}
         placeholder="Text (optional)"
         className="w-full mb-3 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
         rows={4}

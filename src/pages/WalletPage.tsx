@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../hooks/useStore'
 import { getAccountBalance, rawToNano, nanoToRaw, shortenAddress } from '../lib/nano-rpc'
-import { saveWallet, receiveNano, clearWallet, sendNano } from '../lib/wallet'
+import { saveWallet, receiveNano, clearWallet, sendNano, safeBigInt } from '../lib/wallet'
 
 export default function WalletPage() {
   const { state, dispatch, initWallet } = useStore()
@@ -109,12 +109,12 @@ export default function WalletPage() {
             />
             <button
               onClick={() => {
-                if (importSeed.trim().length === 128) {
+                if (importSeed.trim().length === 128 && /^[0-9a-fA-F]+$/.test(importSeed.trim())) {
                   initWallet(importSeed.trim())
                   setImportSeed('')
                 }
               }}
-              disabled={importSeed.trim().length !== 128}
+              disabled={importSeed.trim().length !== 128 || !/^[0-9a-fA-F]+$/.test(importSeed.trim())}
               className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded font-medium"
             >
               Import
@@ -160,7 +160,7 @@ export default function WalletPage() {
                 </div>
               </div>
 
-              {BigInt(state.wallet.pending || '0') > 0n && (
+              {safeBigInt(state.wallet.pending) > 0n && (
                 <button
                   onClick={handleReceive}
                   disabled={receiving}
@@ -180,6 +180,7 @@ export default function WalletPage() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
+                maxLength={50}
                 className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-orange-500"
               />
               <button

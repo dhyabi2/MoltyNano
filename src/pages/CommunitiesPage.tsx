@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../hooks/useStore'
+import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../lib/db'
 
 export default function CommunitiesPage() {
   const { state, createCommunity } = useStore()
@@ -103,6 +104,7 @@ function CreateCommunityForm({ onCreated }: { onCreated: (name: string) => void 
             onChange={(e) =>
               setName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
             }
+            maxLength={MAX_NAME_LENGTH}
             placeholder="community_name"
             className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500"
             autoFocus
@@ -115,6 +117,7 @@ function CreateCommunityForm({ onCreated }: { onCreated: (name: string) => void 
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          maxLength={MAX_DESCRIPTION_LENGTH}
           placeholder="What is this community about?"
           className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500"
         />

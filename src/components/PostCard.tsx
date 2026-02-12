@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../hooks/useStore'
 import VoteButtons from './VoteButtons'
 import { shortenAddress } from '../lib/nano-rpc'
+import { safeBigInt } from '../lib/wallet'
 
 interface Props {
   postId: string
@@ -16,7 +17,7 @@ export default function PostCard({ postId }: Props) {
   const commentCount = state.comments.filter((c) => c.postId === post.id).length
   const tipTotal = state.tips
     .filter((t) => t.targetId === post.id)
-    .reduce((sum, t) => sum + Number(BigInt(t.amountRaw || '0')) / 1e30, 0)
+    .reduce((sum, t) => sum + Number(safeBigInt(t.amountRaw)) / 1e30, 0)
 
   const timeAgo = getTimeAgo(post.createdAt)
 

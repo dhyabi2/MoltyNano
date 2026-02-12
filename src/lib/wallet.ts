@@ -53,9 +53,19 @@ export function publicKeyFromAddress(address: string): string | null {
   }
 }
 
+// Validate nano address format
+export function isValidNanoAddress(address: string): boolean {
+  if (!address || typeof address !== 'string') return false
+  if (!address.startsWith('nano_') && !address.startsWith('xrb_')) return false
+  if (address.length < 60 || address.length > 66) return false
+  // Verify we can derive a public key (validates checksum)
+  return publicKeyFromAddress(address) !== null
+}
+
 // Verify a post's signature using the author's nano address
 export function verifyPostSignature(post: { id: string; title: string; body: string; communityId: string; createdAt: number; author: string; signature: string }): boolean {
-  if (!post.signature || post.author === 'anonymous') return true // unsigned content is allowed but marked
+  if (post.author === 'anonymous') return true // anonymous content is allowed but unverified
+  if (!post.signature) return false // non-anonymous MUST have a signature
   const pubKey = publicKeyFromAddress(post.author)
   if (!pubKey) return false
   const postData = { id: post.id, title: post.title, body: post.body, communityId: post.communityId, createdAt: post.createdAt }
@@ -64,11 +74,53 @@ export function verifyPostSignature(post: { id: string; title: string; body: str
 
 // Verify a comment's signature using the author's nano address
 export function verifyCommentSignature(comment: { id: string; body: string; postId: string; parentId: string | null; createdAt: number; author: string; signature: string }): boolean {
-  if (!comment.signature || comment.author === 'anonymous') return true
+  if (comment.author === 'anonymous') return true
+  if (!comment.signature) return false // non-anonymous MUST have a signature
   const pubKey = publicKeyFromAddress(comment.author)
   if (!pubKey) return false
   const commentData = { id: comment.id, body: comment.body, postId: comment.postId, parentId: comment.parentId, createdAt: comment.createdAt }
   return verifySignature(pubKey, JSON.stringify(commentData), comment.signature)
+}
+
+// Verify a community's signature using the creator's nano address
+export function verifyCommunitySignature(community: { id: string; name: string; description: string; creator: string; createdAt: number; signature: string }): boolean {
+  if (community.creator === 'anonymous') return true
+  if (!community.signature) return false
+  const pubKey = publicKeyFromAddress(community.creator)
+  if (!pubKey) return false
+  const data = { id: community.id, name: community.name, description: community.description, createdAt: community.createdAt }
+  return verifySignature(pubKey, JSON.stringify(data), community.signature)
+}
+
+// Verify a vote's signature using the voter's nano address
+export function verifyVoteSignature(vote: { id: string; targetId: string; targetType: string; voter: string; value: number; createdAt: number; signature: string }): boolean {
+  if (vote.voter === 'anonymous') return true
+  if (!vote.signature) return false
+  const pubKey = publicKeyFromAddress(vote.voter)
+  if (!pubKey) return false
+  const data = { id: vote.id, targetId: vote.targetId, targetType: vote.targetType, value: vote.value, createdAt: vote.createdAt }
+  return verifySignature(pubKey, JSON.stringify(data), vote.signature)
+}
+
+// Verify a tip's signature using the sender's nano address
+export function verifyTipSignature(tip: { id: string; from: string; to: string; amountRaw: string; blockHash: string; targetId: string; targetType: string; createdAt: number; signature: string }): boolean {
+  if (tip.from === 'anonymous') return true
+  if (!tip.signature) return false
+  const pubKey = publicKeyFromAddress(tip.from)
+  if (!pubKey) return false
+  const data = { id: tip.id, from: tip.from, to: tip.to, amountRaw: tip.amountRaw, blockHash: tip.blockHash, targetId: tip.targetId, targetType: tip.targetType, createdAt: tip.createdAt }
+  return verifySignature(pubKey, JSON.stringify(data), tip.signature)
+}
+
+// Safe BigInt parsing that won't throw on invalid input
+export function safeBigInt(value: string | undefined | null, fallback = '0'): bigint {
+  try {
+    const v = value || fallback
+    if (!/^[0-9]+$/.test(v)) return BigInt(fallback)
+    return BigInt(v)
+  } catch {
+    return BigInt(fallback)
+  }
 }
 
 export function saveWallet(state: WalletState): void {
@@ -95,6 +147,11 @@ export async function sendNano(
   toAddress: string,
   amountRaw: string
 ): Promise<string> {
+  // Validate recipient address
+  if (!isValidNanoAddress(toAddress)) {
+    throw new Error('Invalid recipient address. Must be a valid nano_ address.')
+  }
+
   // Get account info
   const info = await getAccountInfo(fromAddress)
   if (!info) {

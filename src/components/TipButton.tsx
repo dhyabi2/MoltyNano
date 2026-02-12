@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../hooks/useStore'
-import { sendNano } from '../lib/wallet'
+import { sendNano, signMessage } from '../lib/wallet'
 import { nanoToRaw, rawToNano } from '../lib/nano-rpc'
 import { generateId } from '../lib/ipfs'
 import { p2pNetwork } from '../lib/p2p'
@@ -44,15 +44,13 @@ export default function TipButton({ targetId, targetType, recipientAddress }: Pr
         amountRaw
       )
 
+      const tipId = generateId()
+      const createdAt = Date.now()
+      const tipSigData = { id: tipId, from: state.wallet.address!, to: recipientAddress, amountRaw, blockHash, targetId, targetType, createdAt }
+      const signature = signMessage(state.wallet.privateKey!, JSON.stringify(tipSigData))
       const tip: Tip = {
-        id: generateId(),
-        from: state.wallet.address,
-        to: recipientAddress,
-        amountRaw,
-        blockHash,
-        targetId,
-        targetType,
-        createdAt: Date.now(),
+        ...tipSigData,
+        signature,
       }
 
       await upsertTip(tip)

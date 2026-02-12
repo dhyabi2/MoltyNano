@@ -12,55 +12,54 @@
         - link "Communities" [ref=e9] [cursor=pointer]:
           - /url: "#/communities"
       - generic [ref=e10]:
-        - link "1 peer" [ref=e11] [cursor=pointer]:
+        - link [ref=e11] [cursor=pointer]:
           - /url: "#/network"
-          - generic [ref=e13]: 1 peer
-        - link "Connect Wallet" [ref=e14] [cursor=pointer]:
+        - link "Wallet" [ref=e13] [cursor=pointer]:
           - /url: "#/wallet"
-  - generic [ref=e15]:
-    - heading "P2P Network" [level=1] [ref=e16]
-    - generic [ref=e17]:
-      - heading "Network Status" [level=2] [ref=e18]
-      - generic [ref=e19]:
-        - generic [ref=e22]: Connected to 1 peer
-        - generic [ref=e23]:
-          - generic [ref=e24]: Your Peer ID (share this with others)
-          - generic [ref=e25]: sAWc188xEFz4DnrkrFS6
-    - generic [ref=e26]:
-      - heading "Connected Peers (1)" [level=2] [ref=e27]
-      - list [ref=e28]:
-        - listitem [ref=e29]:
-          - generic [ref=e31]: HpQpSVEok7veACFiR7eK
-    - generic [ref=e32]:
-      - heading "Manual Connect (optional)" [level=2] [ref=e33]
-      - paragraph [ref=e34]: Peers are found automatically. Use this only if you want to connect to a specific peer directly.
-      - generic [ref=e35]:
-        - textbox "Peer ID" [ref=e36]
-        - button "Connect" [disabled] [ref=e37]
-    - generic [ref=e38]:
-      - heading "Data Export / Import (IPFS-compatible JSON)" [level=2] [ref=e39]
-      - paragraph [ref=e40]: Export your data as JSON to pin to IPFS (via PinMe or similar), or import data from IPFS. This is your data backup and portability mechanism.
-      - button "Export Data (Copy to Clipboard)" [ref=e42]
-      - generic [ref=e43]:
-        - generic [ref=e44]: "Import JSON data:"
-        - textbox "Paste exported JSON here..." [ref=e45]
-        - button "Import" [disabled] [ref=e46]
-    - generic [ref=e47]:
-      - heading "How P2P Networking Works" [level=2] [ref=e48]
-      - generic [ref=e49]:
-        - paragraph [ref=e50]:
-          - strong [ref=e51]: "Auto-Discovery:"
+  - generic [ref=e14]:
+    - heading "P2P Network" [level=1] [ref=e15]
+    - generic [ref=e16]:
+      - heading "Network Status" [level=2] [ref=e17]
+      - generic [ref=e18]:
+        - generic [ref=e21]: Connected to 1 peer
+        - generic [ref=e22]:
+          - generic [ref=e23]: Your Peer ID (share this with others)
+          - generic [ref=e24]: vJjpe4CQMN0HWxejcwSF
+    - generic [ref=e25]:
+      - heading "Connected Peers (1)" [level=2] [ref=e26]
+      - list [ref=e27]:
+        - listitem [ref=e28]:
+          - generic [ref=e30]: CMC5cRp0sLxxA9IO8xu7
+    - generic [ref=e31]:
+      - heading "Manual Connect (optional)" [level=2] [ref=e32]
+      - paragraph [ref=e33]: Peers are found automatically. Use this only if you want to connect to a specific peer directly.
+      - generic [ref=e34]:
+        - textbox "Peer ID" [ref=e35]
+        - button "Connect" [disabled] [ref=e36]
+    - generic [ref=e37]:
+      - heading "Data Export / Import (IPFS-compatible JSON)" [level=2] [ref=e38]
+      - paragraph [ref=e39]: Export your data as JSON to pin to IPFS (via PinMe or similar), or import data from IPFS. This is your data backup and portability mechanism.
+      - button "Export Data" [ref=e41]
+      - generic [ref=e42]:
+        - generic [ref=e43]: "Import JSON data:"
+        - textbox "Paste exported JSON here..." [ref=e44]
+        - button "Import" [disabled] [ref=e45]
+    - generic [ref=e46]:
+      - heading "How P2P Networking Works" [level=2] [ref=e47]
+      - generic [ref=e48]:
+        - paragraph [ref=e49]:
+          - strong [ref=e50]: "Auto-Discovery:"
           - text: Peers are discovered automatically via public BitTorrent WebSocket trackers. No signaling server required — just open the app and peers find each other.
-        - paragraph [ref=e52]:
-          - strong [ref=e53]: "WebRTC P2P:"
+        - paragraph [ref=e51]:
+          - strong [ref=e52]: "WebRTC P2P:"
           - text: Direct browser-to-browser connections. No data goes through any server — only the initial handshake uses public trackers for peer discovery.
-        - paragraph [ref=e54]:
-          - strong [ref=e55]: "BroadcastChannel:"
+        - paragraph [ref=e53]:
+          - strong [ref=e54]: "BroadcastChannel:"
           - text: Tabs in the same browser automatically discover and sync with each other instantly.
-        - paragraph [ref=e56]:
-          - strong [ref=e57]: "Data Sync:"
+        - paragraph [ref=e55]:
+          - strong [ref=e56]: "Data Sync:"
           - text: When two peers connect, they exchange all their data. New content is broadcast to all connected peers in real-time.
-        - paragraph [ref=e58]:
-          - strong [ref=e59]: "IPFS Export:"
+        - paragraph [ref=e57]:
+          - strong [ref=e58]: "IPFS Export:"
           - text: You can export all data as JSON and pin it to IPFS using PinMe or any IPFS pinning service for permanent storage.
 ```

@@ -5,6 +5,7 @@ export interface Community {
   creator: string // nano address
   createdAt: number
   cid: string // content hash
+  signature: string
 }
 
 export interface Post {
@@ -38,6 +39,7 @@ export interface Vote {
   voter: string // nano address
   value: 1 | -1
   createdAt: number
+  signature: string
 }
 
 export interface Tip {
@@ -49,6 +51,7 @@ export interface Tip {
   targetId: string
   targetType: 'post' | 'comment'
   createdAt: number
+  signature: string
 }
 
 export interface PeerInfo {

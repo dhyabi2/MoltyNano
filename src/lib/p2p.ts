@@ -60,6 +60,11 @@ class P2PNetwork {
   // Offline message queue
   private offlineQueue: P2PMessage[] = []
 
+  // Rate limiting per peer
+  private peerMsgCounts: Map<string, { count: number; resetAt: number }> = new Map()
+  private readonly RATE_LIMIT_WINDOW = 10_000 // 10 seconds
+  private readonly RATE_LIMIT_MAX = 50 // messages per window
+
   // Delta sync tracking per peer
   private lastSyncTime: Map<string, number> = new Map()
 
@@ -117,6 +122,21 @@ class P2PNetwork {
     return false
   }
 
+  private isRateLimited(peerId: string): boolean {
+    const now = Date.now()
+    const entry = this.peerMsgCounts.get(peerId)
+    if (!entry || now > entry.resetAt) {
+      this.peerMsgCounts.set(peerId, { count: 1, resetAt: now + this.RATE_LIMIT_WINDOW })
+      return false
+    }
+    entry.count++
+    if (entry.count > this.RATE_LIMIT_MAX) {
+      console.warn(`[P2P] Rate limited peer ${peerId}: ${entry.count} messages in window`)
+      return true
+    }
+    return false
+  }
+
   // ── Initialisation ────────────────────────────────────────────────────
   // Join the shared Trystero room.  Peer discovery is fully automatic via
   // public BitTorrent WebSocket trackers — no signaling server needed.
@@ -142,6 +162,7 @@ class P2PNetwork {
     const [send, receive] = this.room.makeAction<any>('msg')
     this.sendMsg = send
     receive((data: P2PMessage, peerId: string) => {
+      if (this.isRateLimited(peerId)) return
       if (this.isMessageSeen(data)) return
       this.handleMessage(data, peerId).catch(err => {
         console.error('[P2P] Unhandled error in message handler:', err)

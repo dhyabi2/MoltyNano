@@ -19,7 +19,7 @@ import type {
 import { db, upsertCommunity, upsertPost, upsertComment, upsertVote, upsertTip, getAllData, mergeData, validateSyncData, onDBChange, checkDataIntegrity } from '../lib/db'
 import { p2pNetwork } from '../lib/p2p'
 import { hashContent, generateId } from '../lib/ipfs'
-import { signMessage, loadWallet, saveWallet, createWallet, walletFromSeed, verifyPostSignature, verifyCommentSignature } from '../lib/wallet'
+import { signMessage, loadWallet, saveWallet, createWallet, walletFromSeed, verifyPostSignature, verifyCommentSignature, verifyCommunitySignature, verifyVoteSignature, verifyTipSignature } from '../lib/wallet'
 
 type Action =
   | { type: 'SET_WALLET'; wallet: WalletState }
@@ -260,6 +260,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             break
           }
           case 'NEW_COMMUNITY':
+            if (!verifyCommunitySignature(msg.data)) {
+              console.warn('[Store] Rejected community with invalid signature:', msg.data.id)
+              break
+            }
             await upsertCommunity(msg.data)
             dispatch({ type: 'ADD_COMMUNITY', community: msg.data })
             break
@@ -280,10 +284,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             dispatch({ type: 'ADD_COMMENT', comment: msg.data })
             break
           case 'VOTE':
+            if (!verifyVoteSignature(msg.data)) {
+              console.warn('[Store] Rejected vote with invalid signature:', msg.data.id)
+              break
+            }
             await upsertVote(msg.data)
             dispatch({ type: 'SET_VOTE', vote: msg.data })
             break
           case 'TIP':
+            if (!verifyTipSignature(msg.data)) {
+              console.warn('[Store] Rejected tip with invalid signature:', msg.data.id)
+              break
+            }
             await upsertTip(msg.data)
             dispatch({ type: 'ADD_TIP', tip: msg.data })
             break
@@ -337,14 +349,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         creator: state.wallet.address || 'anonymous',
         createdAt: Date.now(),
         cid: '',
+        signature: '',
       }
-      community.cid = await hashContent(community)
+      const sigData = { id: community.id, name: community.name, description: community.description, createdAt: community.createdAt }
+      community.signature = state.wallet.privateKey
+        ? signMessage(state.wallet.privateKey, JSON.stringify(sigData))
+        : ''
+      community.cid = await hashContent({ ...community, cid: '', signature: '' })
       await upsertCommunity(community)
       dispatch({ type: 'ADD_COMMUNITY', community })
       p2pNetwork.broadcast({ type: 'NEW_COMMUNITY', data: community })
       return community
     },
-    [state.wallet.address]
+    [state.wallet.address, state.wallet.privateKey]
   )
 
   const createPostAction = useCallback(
@@ -400,26 +417,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         (v) => v.targetId === targetId && v.voter === voter
       )
 
-      // Toggle: if same vote, remove (set to 0 effect by not adding)
+      // Toggle: if same vote exists, skip
       if (existing && existing.value === value) {
-        // Remove vote - replace with opposite to zero out, then we just won't add
-        // Actually, just toggle off - but our model doesn't have 0. So we'll just skip.
         return
       }
 
+      const id = existing?.id || generateId()
+      const createdAt = Date.now()
+      const voteData = { id, targetId, targetType, value, createdAt }
+      const signature = state.wallet.privateKey
+        ? signMessage(state.wallet.privateKey, JSON.stringify(voteData))
+        : ''
       const vote: Vote = {
-        id: existing?.id || generateId(),
-        targetId,
-        targetType,
+        ...voteData,
         voter,
-        value,
-        createdAt: Date.now(),
+        signature,
       }
       await upsertVote(vote)
       dispatch({ type: 'SET_VOTE', vote })
       p2pNetwork.broadcast({ type: 'VOTE', data: vote })
     },
-    [state.wallet.address, state.votes]
+    [state.wallet.address, state.wallet.privateKey, state.votes]
   )
 
   const getScore = useCallback(

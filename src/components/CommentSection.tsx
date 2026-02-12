@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../hooks/useStore'
+import { MAX_COMMENT_LENGTH } from '../lib/db'
 import VoteButtons from './VoteButtons'
 import TipButton from './TipButton'
 import { shortenAddress } from '../lib/nano-rpc'
@@ -68,6 +69,7 @@ function CommentItem({ commentId, depth }: CommentProps) {
             <textarea
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
+              maxLength={MAX_COMMENT_LENGTH}
               placeholder="Write a reply..."
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 resize-none"
               rows={2}
@@ -90,8 +92,8 @@ function CommentItem({ commentId, depth }: CommentProps) {
         )}
       </div>
 
-      {/* Nested replies */}
-      {replies.map((r) => (
+      {/* Nested replies (capped at depth 10) */}
+      {depth < 10 && replies.map((r) => (
         <CommentItem key={r.id} commentId={r.id} depth={depth + 1} />
       ))}
     </div>
@@ -123,6 +125,7 @@ export default function CommentSection({ postId }: Props) {
         <textarea
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
+          maxLength={MAX_COMMENT_LENGTH}
           placeholder={
             state.wallet.address
               ? 'What are your thoughts?'

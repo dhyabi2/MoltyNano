@@ -4,6 +4,7 @@ import VoteButtons from '../components/VoteButtons'
 import CommentSection from '../components/CommentSection'
 import TipButton from '../components/TipButton'
 import { shortenAddress } from '../lib/nano-rpc'
+import { safeBigInt } from '../lib/wallet'
 
 export default function PostPage() {
   const { postId } = useParams<{ name: string; postId: string }>()
@@ -25,7 +26,7 @@ export default function PostPage() {
   const commentCount = state.comments.filter((c) => c.postId === post.id).length
   const tipTotal = state.tips
     .filter((t) => t.targetId === post.id)
-    .reduce((sum, t) => sum + Number(BigInt(t.amountRaw || '0')) / 1e30, 0)
+    .reduce((sum, t) => sum + Number(safeBigInt(t.amountRaw)) / 1e30, 0)
 
   const timeAgo = getTimeAgo(post.createdAt)
 

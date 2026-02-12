@@ -1,0 +1,47 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - link "MoltyNano" [ref=e7] [cursor=pointer]:
+          - /url: "#/"
+        - link "Home" [ref=e8] [cursor=pointer]:
+          - /url: "#/"
+        - link "Communities" [ref=e9] [cursor=pointer]:
+          - /url: "#/communities"
+      - generic [ref=e10]:
+        - link [ref=e11] [cursor=pointer]:
+          - /url: "#/network"
+        - link "nano_3kau99h...8kx3bs" [ref=e13] [cursor=pointer]:
+          - /url: "#/wallet"
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - link "m/postsync" [ref=e17] [cursor=pointer]:
+          - /url: "#/c/postsync"
+        - generic [ref=e18]: ·
+        - generic [ref=e19]: Posted by nano_3kau99
+        - generic [ref=e20]: ·
+        - generic [ref=e21]: just now
+      - heading "Sync Test Post" [level=1] [ref=e22]
+      - generic [ref=e23]: This should sync
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - button "Upvote" [ref=e26]:
+            - img [ref=e27]
+          - generic [ref=e29]: "0"
+          - button "Downvote" [ref=e30]:
+            - img [ref=e31]
+        - generic [ref=e33]: 0 comments
+        - generic "Cryptographically signed with Nano key" [ref=e34]: Signed
+        - generic "bafy377b40e9ed7f943dbebe829d16e493dc96cf39b05543ddc314876b55003bb018" [ref=e35]: "CID: bafy377b40e9..."
+    - generic [ref=e36]:
+      - heading "Comments (0)" [level=2] [ref=e37]
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - textbox "What are your thoughts?" [ref=e40]
+          - button "Comment" [disabled] [ref=e42]
+        - paragraph [ref=e44]: No comments yet. Be the first!
+```
